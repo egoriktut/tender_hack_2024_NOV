@@ -5,7 +5,7 @@ from typing import Optional
 class Settings(BaseSettings):
     BROKER_URL: str
     BACKEND_URL: Optional[str] = None
-    # DATABASE_URL: str FOR DB IF WE WILL USE IT
+    DATABASE_URL: str
     MODEL_PATH: str
 
     class Config:
