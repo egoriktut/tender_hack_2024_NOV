@@ -9,3 +9,4 @@ pydantic
 redis
 types-requests
 pydantic-settings
+mypy

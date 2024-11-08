@@ -3,6 +3,7 @@ import requests
 import json
 from app.schemas.ks import KSAttributes
 import time
+from typing import List, Optional, Dict
 
 
 # def fetch_and_parse(url: str) -> dict:
@@ -17,17 +18,17 @@ import time
 
 class ParserWeb:
 
-    def __init__(self, urls):
-        self.urls = set(urls)
-        self.urls_with_attributes = {}
+    def __init__(self, urls: List[str]) -> None:
+        self.urls: set = set(urls)
+        self.urls_with_attributes: Dict[str, Optional[KSAttributes]] = {}
 
     @staticmethod
-    def is_real_url(url):
+    def is_real_url(url: str) -> bool:
         result = requests.get(url)
         return result.status_code == 200
 
     @staticmethod
-    def get_attributes_ks(url):
+    def get_attributes_ks(url: str) -> Optional[KSAttributes]:
         try:
             auction_id = url.split("/")[-1]
             result = json.loads(
@@ -54,7 +55,7 @@ class ParserWeb:
         except Exception as e:
             return None
 
-    def start(self):
+    def start(self) -> None:
         for url in self.urls:
             if self.is_real_url(url):
                 attr = self.get_attributes_ks(url)

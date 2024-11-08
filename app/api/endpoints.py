@@ -2,14 +2,18 @@ from fastapi import APIRouter, HTTPException
 from celery.result import AsyncResult
 from app.tasks import start_analysis_task
 from app.schemas.api import AnalyzeUrlRequest, AnalyzeUrlResponse, AnalysisResultResponse
+from typing import List
 
 router = APIRouter()
 
 
 @router.post("/analyze/", response_model=AnalyzeUrlResponse)
 async def analyze_url(request: AnalyzeUrlRequest) -> AnalyzeUrlResponse:
-    task = start_analysis_task.delay(request.url)
-    return AnalyzeUrlResponse(task_id=task.id, status="processing")
+    task_ids: List[str] = []
+    for url in request.urls:
+        task = start_analysis_task.delay(url)
+        task_ids.append(task.id)
+    return AnalyzeUrlResponse(task_ids=task_ids, status="processing")
 
 
 @router.get("/analyze/{task_id}", response_model=AnalysisResultResponse)

@@ -1,13 +1,13 @@
 from pydantic import BaseModel
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 
 class AnalyzeUrlRequest(BaseModel):
-    url: str
+    urls: List[str]
 
 
 class AnalyzeUrlResponse(BaseModel):
-    task_id: str
+    task_ids: List[str]
     status: str
 
 

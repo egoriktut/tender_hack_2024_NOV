@@ -17,7 +17,7 @@ celery -A app.celery_app worker --loglevel=info
 uvicorn app.main:app --reload
 
 
-тупо баш, надеемся что сразуу стартанет
+тупо баш, над[README.md](README.md)еемся что сразуу стартанет
 ./run.sh
 
 
