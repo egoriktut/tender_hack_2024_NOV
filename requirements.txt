@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+celery[redis]
+sqlalchemy
+transformers
+beautifulsoup4
+requests
+pydantic
+redis
+types-requests
+pydantic-settings
