@@ -24,14 +24,15 @@ function isValidUrl(string) {
 }
 
 const tasksShow = ref([])
+const canProcess = ref(true)
 
 const statusWorker = async (tasks) => {
   const tasksUnCompleted = ref([])
-
+  canProcess.value = false
   Object.keys(tasks).forEach((task) => {
     tasksUnCompleted.value.push({
-      id: task,
-      url: tasks[task],
+      id: tasks[task],
+      url: task,
       status: "processing",
       result: {}
     })
@@ -42,28 +43,34 @@ const statusWorker = async (tasks) => {
   while (tasksUnCompleted.value.length > 0) {
     for (const task of tasksUnCompleted.value) {
       try {
-        const response = await getData(`analyze/${task.id}`)
-        const status = response.status
-        const result = response.result
+        getData(`analyze/${task.id}`).then((response) => {
+          const status = response.status
+          const result = response.result
 
-        if (status === "completed" || status === "failed") {
-          const index = tasksShow.value.findIndex(t => t.id === task.id)
-          if (index !== -1) {
-            tasksShow.value[index].status = status
-            tasksShow.value[index].result = status === "completed" ? result : {}
+          if (status === "completed" || status === "failed") {
+            const index = tasksShow.value.findIndex(t => t.id === task.id)
+            if (index !== -1) {
+              tasksShow.value[index].status = status
+              tasksShow.value[index].result = status === "completed" ? result : {}
+            }
+            tasksUnCompleted.value = tasksUnCompleted.value.filter(t => t.id !== task.id)
           }
-          tasksUnCompleted.value = tasksUnCompleted.value.filter(t => t.id !== task.id)
-        }
+        })
+
       } catch (error) {
         console.error(`Error processing task ${task.id}:`, error)
       }
     }
-
-    // await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 1000))
   }
+  canProcess.value = true
 }
 
 async function checkKS() {
+  if (!canProcess.value) {
+    return
+  }
+
   const urlsSend = url.value.split('\n').map(item => item.trim()).filter(Boolean);
 
   if (urlsSend.length === 0) {
@@ -116,7 +123,15 @@ async function checkKS() {
       </div>
     </div>
 
-    <button @click="checkKS">Проверить КС</button>
+    <button
+      @click="checkKS"
+      :style="{
+        backgroundColor: !canProcess ? '#ccc' : '#007bff',
+        cursor: !canProcess ? 'not-allowed' : 'pointer'
+      }"
+    >
+      Проверить КС
+    </button>
 
     <div v-if="tasksShow.length > 0" class="tasks-status">
       <h3>Статус обработки ссылок КС</h3>
