@@ -1,8 +1,18 @@
-import json
-
+from bs4 import BeautifulSoup
 import requests
+import json
+from app.schemas.ks import KSAttributes
+import time
 
-from models.ks import KSAttributes
+
+# def fetch_and_parse(url: str) -> dict:
+#     response = requests.get(url)
+#     soup = BeautifulSoup(response.text, 'html.parser')
+#
+#     title = soup.find('title').get_text()
+#     content = soup.get_text()
+#
+#     return {"title": title, "content": content}
 
 
 class ParserWeb:
@@ -52,6 +62,14 @@ class ParserWeb:
                     self.urls_with_attributes[url] = self.get_attributes_ks(url)
 
 
-web = ParserWeb(["https://zakupki.mos.ru/auction/9869986"])
-web.start()
-print(web.urls_with_attributes)
+def fetch_and_parse(url: str) -> dict:
+    # Simulate a network delay for fetching and parsing
+    # web = ParserWeb(["https://zakupki.mos.ru/auction/9869986"])
+    # web.start()
+    # print(web.urls_with_attributes)
+
+    time.sleep(2)
+    return {
+        "title": "Mock Page Title",
+        "content": "This is the mock content of the page for testing."
+    }
