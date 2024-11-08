@@ -13,7 +13,6 @@ const reasons = [
   { value: 6, label: "Спецификации" },
 ]
 
-// Функция для проверки валидности URL
 function isValidUrl(string) {
   const pattern = new RegExp('^(https?:\\/\\/)?' +
       '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' +
@@ -22,6 +21,46 @@ function isValidUrl(string) {
       '(\\?[;&a-z\\d%_.~+=-]*)?' +
       '(\\#[-a-z\\d_]*)?$', 'i');
   return !!pattern.test(string);
+}
+
+const tasksShow = ref([])
+
+const statusWorker = async (tasks) => {
+  const tasksUnCompleted = ref([])
+
+  Object.keys(tasks).forEach((task) => {
+    tasksUnCompleted.value.push({
+      id: task,
+      url: tasks[task],
+      status: "processing",
+      result: {}
+    })
+  })
+
+  tasksShow.value = tasksUnCompleted.value
+
+  while (tasksUnCompleted.value.length > 0) {
+    for (const task of tasksUnCompleted.value) {
+      try {
+        const response = await getData(`analyze/${task.id}`)
+        const status = response.status
+        const result = response.result
+
+        if (status === "completed" || status === "failed") {
+          const index = tasksShow.value.findIndex(t => t.id === task.id)
+          if (index !== -1) {
+            tasksShow.value[index].status = status
+            tasksShow.value[index].result = status === "completed" ? result : {}
+          }
+          tasksUnCompleted.value = tasksUnCompleted.value.filter(t => t.id !== task.id)
+        }
+      } catch (error) {
+        console.error(`Error processing task ${task.id}:`, error)
+      }
+    }
+
+    // await new Promise(resolve => setTimeout(resolve, 1000))
+  }
 }
 
 async function checkKS() {
@@ -48,7 +87,12 @@ async function checkKS() {
 
   alert(`Проверка КС по URL:\n${urlsSend.join('\n')}\n\nВыбранные основания: \n${selectedLabels.join('\n')}`);
 
-  const response = await postData("analyze", {urls: urlsSend})
+  const response = await postData("analyze", {urls: urlsSend, validate_params: selectedReasons.value})
+  if (response) {
+     await statusWorker(response.task_ids)
+  } else {
+    alert("Ошибка обработки ссылок КС")
+  }
 
 }
 </script>
@@ -73,6 +117,30 @@ async function checkKS() {
     </div>
 
     <button @click="checkKS">Проверить КС</button>
+
+    <div v-if="tasksShow.length > 0" class="tasks-status">
+      <h3>Статус обработки ссылок КС</h3>
+      <ul>
+        <li v-for="task in tasksShow" :key="task.id" class="task-item">
+          <template v-if="task.status === 'processing'">
+            {{ task.url }} <span class="loader"></span>
+          </template>
+
+          <template v-else-if="task.status === 'completed'">
+            <details>
+              <summary>
+                <a :href="task.url" target="_blank" rel="noopener noreferrer">{{ task.url }}</a>
+              </summary>
+              <pre>{{ task.result }}</pre>
+            </details>
+          </template>
+
+          <template v-else-if="task.status === 'failed'">
+            {{ task.url }} <span class="failed">✖</span>
+          </template>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
@@ -152,5 +220,52 @@ button:hover {
 
 button:active {
   background-color: #003d80;
+}
+
+.tasks-status ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  font-size: 0.9em;
+}
+
+.loader {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  animation: spin 1s linear infinite;
+  margin-left: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.failed {
+  color: #f44336;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+details summary {
+  cursor: pointer;
+  color: #007bff;
+}
+
+details summary a {
+  text-decoration: none;
+  color: inherit;
 }
 </style>
