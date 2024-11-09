@@ -44,7 +44,7 @@ class KSValidator:
         validation_checks = {
             ValidationOption.VALIDATE_NAMING: self.validate_naming,
             ValidationOption.VALIDATE_PERFORM_CONTRACT_REQUIRED: self.validate_perform_contract_required,
-            ValidationOption.VALIDATE_LICENSE: lambda: bool(random.randint(0, 1)),
+            ValidationOption.VALIDATE_LICENSE: self.validate_license,
             ValidationOption.VALIDATE_DELIVERY_GRAPHIC: lambda: bool(
                 random.randint(0, 1)
             ),
