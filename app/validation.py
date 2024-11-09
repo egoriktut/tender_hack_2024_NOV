@@ -102,7 +102,7 @@ class KSValidator:
                 expected_text = self.number_to_words(
                     page_data.isContractGuaranteeRequired
                 )
-                text_to_check = file["decrypt"].lower()
+                text_to_check = file["decrypt"].lower().strip()
                 print(text_to_check)
                 pattern = re.sub(r"\s+", r"\\s*", re.escape(
                     f"Размер обеспечения исполнения Контракта составляет {expected_text}"
@@ -119,7 +119,7 @@ class KSValidator:
             file_txt = file["decrypt"]
             normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', "", file_txt)
             normalized_text = re.sub(r"\s+", " ", normalized_text)
-            file_txtg = normalized_text.strip()
+            file_txt = normalized_text.strip()
 
             window = len(page_data.name) + 40
             for start in range(0, min(200, len(str(file_txt))), 10):
