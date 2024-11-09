@@ -236,6 +236,7 @@ class KSValidator:
                 print(item)
 
             tables = file["pandas_tables"]
+            print(tables)
             validated_items: List = []
             if tables is None:
                 continue
@@ -244,7 +245,7 @@ class KSValidator:
                 print(col_name_mapper)
                 for idx, res_row in enumerate(unique_items):
                     # dont touch header row
-
+                    print(idx, res_row)
                     for index, row in table.df[1:].iterrows():
                         # try for invalid tables
                         try:
