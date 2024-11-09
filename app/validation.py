@@ -54,7 +54,7 @@ class KSValidator:
             file_path = f'./resources/_{page_data.auction_id}_{file["name"]}'
             text_pdf = read_file(file_path)
             file["decrypt"] = text_pdf
-            file["tables"] = camelot.read_pdf(file_path, pages="all")
+            # file["tables"] = camelot.read_pdf(file_path, pages="all")
             print("HERE")
             print(text_pdf)
             os.remove(file_path)
