@@ -178,44 +178,74 @@ class KSValidator:
                 "date": ["сроки", "срок", "Дата"],
                 # "cost": ["Стоимость", "Цена", "Стоим."],
             }
+            """
+            [{'periodDaysFrom': 1, 'periodDaysTo': 20, 'periodDateFrom': None, 'periodDateTo': None, 
+            'deliveryPlace': 'г г Москва, Город Москва, переулок 5-й Монетчиковский, дом 3, строение 1', 
+            'quantity': 0.0, 'items': [{'sum': 172973.12, 'costPerUnit': 172973.12, 'quantity': 1.0, 'name':
+             'Выполнение работ по текущему ремонту специального объекта', 'buyerId': None, 
+             'isBuyerInvitationSent': False, 'isApprovedByBuyer': None}], 'id': 6236793}]
+            """
+            deliveries = api_data.deliveries
+            from collections import defaultdict
 
-            items = api_data.deliveries['items']
-            items_map = {}
+            aggregated_items = defaultdict(lambda: {"sum": 0.0, "quantity": 0.0, "costPerUnit": 0.0, "name": ""})
 
-            for item_list in items:
-                for item in item_list:
-                    if item['name'] in items_map:
-                        items_map[item['name']]['quantity'] += item['quantity']
-                        items_map[item['name']]['sum'] += item['sum']
-                    else:
-                        items_map[item['name']] = item
-            items = []
-            for key, value in items_map:
-                items.append(value)
-            print("ITEMS: ", items)
+            for delivery in deliveries:
+                for item in delivery.get("items", []):
+                    name = item["name"]
 
-            tables = file["tables"]
-            validated_items: List = []
+                    aggregated_items[name]["name"] = name
+                    aggregated_items[name]["sum"] += item["sum"]
+                    aggregated_items[name]["quantity"] += item["quantity"]
+                    aggregated_items[name]["costPerUnit"] = item["costPerUnit"]
 
-            for table in tables:
-                col_name_mapper: dict = self.map_pdf_columns(reference_col_name, table.df.iloc[0])
+            unique_items = list(aggregated_items.values())
 
-                for idx, res_row in enumerate(items):
-                    # dont touch header row
-                    for index, row in table.df[1:].iterrows():
-                        # try for invalid tables
-                        try:
-                            name = row[col_name_mapper['name']]
-                            quantity = row[col_name_mapper.get('quantity', None)]
-                            date = row[col_name_mapper.get('date', None)]
-                            if (self.check_specification_name_equality(name, res_row['name'])
-                                and res_row['periodDaysTo'] in date
-                                and quantity == res_row['quantity']):
-                                validated_items.append(res_row)
-                        except:
-                            print("err")
-                            break
-            validation_checks.append(len(validated_items) == len(items))
+
+            for item in unique_items:
+                print(item)
+
+    # print(items)
+    #         items_map = {}
+    #         new_items = []
+    #         for item_list in items:
+    #             new_items.extend(item_list)
+    #
+    #         print(new_items)
+    #         for item in new_items:
+    #
+    #             if item['name'] in items_map:
+    #                 items_map[item['name']]['quantity'] += item['quantity']
+    #                 items_map[item['name']]['sum'] += item['sum']
+    #             else:
+    #                 items_map[item['name']] = item
+    #         items = []
+    #         for key, value in items_map:
+    #             items.append(value)
+    #         print("ITEMS: ", items)
+    #
+    #         tables = file["decrypt"]
+    #         validated_items: List = []
+    #
+    #         for table in tables:
+    #             col_name_mapper: dict = self.map_pdf_columns(reference_col_name, table.df.iloc[0])
+    #
+    #             for idx, res_row in enumerate(items):
+    #                 # dont touch header row
+    #                 for index, row in table.df[1:].iterrows():
+    #                     # try for invalid tables
+    #                     try:
+    #                         name = row[col_name_mapper['name']]
+    #                         quantity = row[col_name_mapper.get('quantity', None)]
+    #                         date = row[col_name_mapper.get('date', None)]
+    #                         if (self.check_specification_name_equality(name, res_row['name'])
+    #                             and res_row['periodDaysTo'] in date
+    #                             and quantity == res_row['quantity']):
+    #                             validated_items.append(res_row)
+    #                     except:
+    #                         print("err")
+    #                         break
+    #         validation_checks.append(len(validated_items) == len(items))
         return all(validation_checks)
 
 
