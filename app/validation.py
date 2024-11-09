@@ -14,6 +14,7 @@ from fuzzywuzzy import fuzz
 from num2words import num2words
 import camelot
 from transformers.utils import download_url
+from websockets.asyncio.server import serve
 
 from app.schemas.api import ValidationOption, ValidationOptionResult
 from app.schemas.ks import KSAttributes
@@ -43,7 +44,7 @@ class KSValidator:
         validation_checks = {
             ValidationOption.VALIDATE_NAMING: self.validate_naming,
             ValidationOption.VALIDATE_PERFORM_CONTRACT_REQUIRED: self.validate_perform_contract_required,
-            ValidationOption.VALIDATE_LICENSE: lambda: bool(random.randint(0, 1)),
+            ValidationOption.VALIDATE_LICENSE: self.validate_license,
             ValidationOption.VALIDATE_DELIVERY_GRAPHIC: lambda: bool(
                 random.randint(0, 1)
             ),
@@ -208,7 +209,7 @@ class KSValidator:
                 "name": ["Наименование", "Название"],
                 "quantity": ["Кол.", "Кол-", "Кол-во", "Количество"],
                 "date": ["сроки", "срок", "Дата"],
-                "cost": ["Стоимость", "Цена", "Стоим."],
+                "cost": ["Стоимость", "Цена", "Стоим"],
             }
             deliveries = api_data.deliveries
             from collections import defaultdict
@@ -236,28 +237,46 @@ class KSValidator:
                 continue
             for table in tables:
                 col_name_mapper: dict = self.map_pdf_columns(reference_col_name, table.df.iloc[0])
-
+                print(col_name_mapper)
                 for idx, res_row in enumerate(unique_items):
                     # dont touch header row
+
                     for index, row in table.df[1:].iterrows():
                         # try for invalid tables
                         try:
+                            print(row)
                             name = row[col_name_mapper['name']]
                             quantity = row[col_name_mapper.get('quantity', None)]
+                            cost = row=[col_name_mapper.get('cost', None)]
                             date = row[col_name_mapper.get('date', None)]
-                            if (self.check_specification_name_equality(name, res_row['name'])
-                                and res_row['periodDaysTo'] in date
-                                and quantity == res_row['quantity']):
+                            print(self.check_similarity_transformer(name, res_row['name']), self.checkSpecDate(date, res_row["periodDaysTo"]), self.checkSpecCost(cost, res_row[cost]), self.checkSpecEquantity(quantity, res_row['quantity']))
+                            if self.check_similarity_transformer(name, res_row['name']) and self.checkSpecDate(date, res_row["periodDaysTo"]) and self.checkSpecCost(cost, res_row[cost]) and self.checkSpecEquantity(quantity, res_row['quantity']):
                                 validated_items.append(res_row)
+                        
                         except:
                             print("err")
                             break
+            print(len(validated_items))
+            print(len(unique_items))
             validation_checks.append(len(validated_items) == len(unique_items))
         print(validation_checks)
 
         return ValidationOptionResult(status=all(validation_checks), description="")
 
+    def checkSpecDate(self, pdf_date: str, api_date: str) -> bool:
+        if pdf_date is None or api_date is None:
+            return false
+        return api_date in pdf_date
 
+    def checkSpecCost(self, pdf_cost: str, api_cost: str) -> bool:
+        if pdf_cost is None or api_cost is None:
+            return False
+        return pdf_cost == api_cost
+    
+    def checkSpecEquantity(self, pdf_eq: str, api_eq: str) -> bool:
+        if pdf_eq is None or api_eq is None:
+            return False
+        return pdf_eq == api_eq
 
     # map columns name to col id
     @staticmethod
@@ -288,3 +307,37 @@ class KSValidator:
         )
         print(pdf_text, api_text, "similarity", similarity_score, inversed_similarity_score)
         return similarity_score > 80 or inversed_similarity_score > 80
+
+    def validate_license(self, page_data: KSAttributes):
+        license_text = page_data.isLicenseProduction
+        print(license_text)
+        if isinstance(license_text, bool):
+            for file in page_data.files:
+                if file["decrypt_plain"] is None:
+                    continue
+                text_to_check = file["decrypt_plain"].lower().strip()
+                normalized_text = re.sub(r"\s+", " ", text_to_check)
+                text_to_check = normalized_text.strip()
+                pattern1 = r"\s*лицензи\s*"
+                pattern2 = r"\s*сертификат\s*"
+                if re.search(pattern1, text_to_check) and re.search(pattern2, text_to_check):
+                    return False
+            return True
+
+        else:
+            for file in page_data.files:
+                if file["decrypt_plain"] is None:
+                    continue
+                text_to_check = file["decrypt_plain"].lower().strip()
+                normalized_text = re.sub(r"\s+", " ", text_to_check)
+                text_to_check = normalized_text.strip()
+                licenses_indices = [i.start() for i in re.finditer("лицензи", text_to_check)]
+                certificate_indices = [i.start() for i in re.finditer("сертификат", text_to_check)]
+                for index in licenses_indices + certificate_indices:
+                    start_index = max(0, index - 5)
+                    end_index = min(len(text_to_check), index + len(license_text) - 5)
+                    substring = normalized_text[start_index:end_index]
+                    similarity_score = fuzz.partial_ratio(license_text.lower(), substring.lower())
+                    if similarity_score > 80:
+                        return True
+            return False
