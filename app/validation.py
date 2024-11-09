@@ -143,7 +143,7 @@ class KSValidator:
                 if similarity_score > 70:
                     return True
             print("CHECE", normalized_text[:100])
-            tf_result = self.check_similarity_transformer(page_data.name, normalized_text[:100])
+            tf_result = self.check_similarity_transformer(page_data.name, normalized_text[:200])
             if tf_result:
                 return True
 
