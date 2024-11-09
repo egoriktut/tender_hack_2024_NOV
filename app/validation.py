@@ -65,9 +65,9 @@ class KSValidator:
             # except FileNotFoundError:
             #     pass
 
-        output_file_path = f"./resources/{page_data.auction_id}_result.json"
-        with open(output_file_path, "a+", encoding="utf-8") as f:
-            f.write(json.dumps(page_data.json(), ensure_ascii=False, indent=4))
+        # output_file_path = f"./resources/{page_data.auction_id}_result.json"
+        # with open(output_file_path, "a+", encoding="utf-8") as f:
+        #     f.write(json.dumps(page_data.json(), ensure_ascii=False, indent=4))
 
         validation_result = {
             option: validation_checks[option](page_data)
@@ -210,13 +210,6 @@ class KSValidator:
                 "date": ["сроки", "срок", "Дата"],
                 "cost": ["Стоимость", "Цена", "Стоим."],
             }
-            """
-            [{'periodDaysFrom': 1, 'periodDaysTo': 20, 'periodDateFrom': None, 'periodDateTo': None, 
-            'deliveryPlace': 'г г Москва, Город Москва, переулок 5-й Монетчиковский, дом 3, строение 1', 
-            'quantity': 0.0, 'items': [{'sum': 172973.12, 'costPerUnit': 172973.12, 'quantity': 1.0, 'name':
-             'Выполнение работ по текущему ремонту специального объекта', 'buyerId': None, 
-             'isBuyerInvitationSent': False, 'isApprovedByBuyer': None}], 'id': 6236793}]
-            """
             deliveries = api_data.deliveries
             from collections import defaultdict
 
