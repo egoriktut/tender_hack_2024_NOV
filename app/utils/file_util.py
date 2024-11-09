@@ -26,14 +26,16 @@ def doc_to_pdf(docpath) -> str:
 
 def read_file(path: str):
     if path.endswith(".doc") or path.endswith(".docx"):
+        path_docx = path
         path = doc_to_pdf(path)
+        # os.remove(path_docx)
     try:
         parsed_plaint_text = read_plain_text(path)
-        parse_pdf_tables(path)
+        tables = parse_pdf_tables(path)
         parsed_data = {}
         with open(path + ".decrypt", "r") as file:
             parsed_data = file.read()
-        os.remove(path + ".decrypt")
-        return parsed_data, parsed_plaint_text
+        # os.remove(path + ".decrypt")
+        return parsed_data, parsed_plaint_text, tables
     except Exception as e:
-        return None, None
+        return None, None, None

@@ -12,6 +12,7 @@ import random
 from fuzzywuzzy import fuzz
 from num2words import num2words
 import camelot
+from transformers.utils import download_url
 
 from app.schemas.api import ValidationOption
 from app.schemas.ks import KSAttributes
@@ -54,14 +55,15 @@ class KSValidator:
                 file["downloads_link"], file["name"], page_data.auction_id
             )
             file_path = f'./resources/_{page_data.auction_id}_{file["name"]}'
-            text_pdf, text_pdf_plain = read_file(file_path)
+            text_pdf, text_pdf_plain, pandas_tables = read_file(file_path)
             file["decrypt"] = text_pdf
             file["decrypt_plain"] = text_pdf_plain
+            file["pandas_tables"] = pandas_tables
             print("HERE")
-            try:
-                os.remove(f"{file_path}.decrypt")
-            except FileNotFoundError:
-                pass
+            # try:
+            #     os.remove(f"{file_path}.decrypt")
+            # except FileNotFoundError:
+            #     pass
 
         output_file_path = f"./resources/{page_data.auction_id}_result.json"
         with open(output_file_path, "a+", encoding="utf-8") as f:
@@ -235,7 +237,7 @@ class KSValidator:
             for item in unique_items:
                 print(item)
 
-            tables = file["decrypt"]
+            tables = file["pandas_tables"]
             validated_items: List = []
 
             for table in tables:
@@ -257,6 +259,8 @@ class KSValidator:
                             print("err")
                             break
             validation_checks.append(len(validated_items) == len(unique_items))
+        print(validation_checks)
+
         return all(validation_checks)
 
 
