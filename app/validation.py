@@ -1,7 +1,7 @@
 import re
 import os
 from typing import Dict, List, Optional
-from sentence_transformers import SentenceTransformer, util
+# from sentence_transformers import SentenceTransformer, util
 
 import requests
 import random
@@ -75,7 +75,7 @@ class KSValidator:
 
             window = len(page_data.name) + 40
             print("is ok")
-            for start in range(min(200, len(normalized_text)), 10):
+            for start in range(min(200, len(str(normalized_text))), 10):
                 end = min(start + window, len(normalized_text) - 1)
                 similarity_score = fuzz.partial_ratio(page_data.name.lower(), normalized_text[start:end].lower())
                 print(f"LOLOLOL OMAGAD EEGORIK {similarity_score}, start {start} end {end}, name {page_data.name}")
@@ -83,27 +83,3 @@ class KSValidator:
                     return True
 
         return False
-from sentence_transformers import SentenceTransformer, util
-
-interface_name = "ОБСЛУЖИВАНИЕ ТЕХНИЧЕСКОЕ И ТЕКУЩИЙ РЕМОНТ ЛЕГКОВЫХ АВТОМОБИЛЕЙ"
-td_name = "Техническое обслуживание и текущий ремонт легковых автомобилей"
-
-# Загрузка модели Sentence Transformers
-model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
-
-# Преобразование текстов в векторы
-interface_embedding = model.encode(interface_name, convert_to_tensor=True)
-td_embedding = model.encode(td_name, convert_to_tensor=True)
-
-# Вычисление сходства
-similarity_score = util.cos_sim(interface_embedding, td_embedding).item()
-
-# Установка порогового значения
-threshold = 0.75
-
-print(similarity_score)
-# Вывод результата
-if similarity_score >= threshold:
-    print("Наименование закупки валидно: тексты по смыслу сопоставимы.")
-else:
-    print("Наименование закупки не валидно: тексты по смыслу не сопоставимы.")
