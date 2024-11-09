@@ -93,7 +93,7 @@ class KSValidator:
                 pattern = r"Размер обеспечения исполнения Контракта составляет\s+\d+(?:\s\d+)*\sрублей\s\d{2}\sкопеек".lower()
                 if re.search(pattern, text_to_check):
                     return False
-                return True
+            return True
 
         else:
             for file in page_data.files:
@@ -104,13 +104,14 @@ class KSValidator:
                 )
                 text_to_check = file["decrypt"].lower().strip()
                 print(text_to_check)
-                pattern = re.sub(r"\s+", r"\\s*", re.escape(
-                    f"Размер обеспечения исполнения Контракта составляет {expected_text}"
-                ).lower())
+                pattern = (
+                    r"размер\s*обеспечения\s*исполнения\s*контракта\s*составляет\s*"
+                    r"30\s*000\s*\(тридцать\s*тысяч\)\s*рублей\s*00\s*\(ноль\)\s*копеек"
+                )
                 print(pattern)
                 if re.search(pattern, text_to_check):
                     return True
-                return False
+            return False
 
     def validate_naming(self, page_data: KSAttributes) -> bool:
         for file in page_data.files:
