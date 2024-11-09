@@ -129,23 +129,29 @@ class KSValidator:
             normalized_text = re.sub(r"\s+", " ", normalized_text)
             normalized_text = normalized_text.strip()
 
-            target_phrase = "ТЕХНИЧЕСКОЕ ЗАДАНИЕ"
-            match = re.search(target_phrase, normalized_text[:250], re.IGNORECASE)
+            target_phrase_start = "ТЕХНИЧЕСКОЕ ЗАДАНИЕ"
+            match_start = re.search(target_phrase_start, normalized_text[:250], re.IGNORECASE)
             start_index = 0
-            if match:
-                start_index = match.start() + len(target_phrase)
-            print(f"START INDEX {start_index}")
-            for end in range(len(page_data.name)+40, len(page_data.name) + 140, 10):
-                similarity_score = fuzz.partial_ratio(
-                    page_data.name.lower(), normalized_text[start_index:end].lower()
-                )
-                print(
-                    f"LOLOLOL OMAGAD EEGORIK {similarity_score}, start {start_index} end {end}, name {page_data.name} ||| START {start_index} - text {normalized_text[start_index:end]}"
-                )
-                if similarity_score > 70:
-                    return True
-            print("CHECE", normalized_text[:100])
-            tf_result = self.check_similarity_transformer(page_data.name, normalized_text[start_index:start_index+200])
+            if match_start:
+                start_index = match_start.start() + len(target_phrase_start)
+
+            target_phrase_end = "Общая информация об объекте закупки"
+            match_end = re.search(target_phrase_end, normalized_text[:250], re.IGNORECASE)
+            end_index = start_index + len(page_data.name) + 100
+            if match_end:
+                end_index = match_end.start()
+
+            print(f"START {start_index}, END {end_index}")
+            similarity_score = fuzz.partial_ratio(
+                page_data.name.lower(), normalized_text[start_index:end_index].lower()
+            )
+            print(
+                f"LOLOLOL OMAGAD EEGORIK {similarity_score}, start {start_index} end {end_index}, name {page_data.name} ||| - text {normalized_text[start_index:end_index]}"
+            )
+            if similarity_score > 70:
+                return True
+            print("CHECE", normalized_text[:200])
+            tf_result = self.check_similarity_transformer(page_data.name, normalized_text[start_index:end_index])
             if tf_result:
                 return True
 
