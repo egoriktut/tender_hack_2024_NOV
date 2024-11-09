@@ -14,6 +14,7 @@ from fuzzywuzzy import fuzz
 from num2words import num2words
 import camelot
 from transformers.utils import download_url
+from websockets.asyncio.server import serve
 
 from app.schemas.api import ValidationOption
 from app.schemas.ks import KSAttributes
@@ -256,6 +257,8 @@ class KSValidator:
                         except:
                             print("err")
                             break
+            print(len(validated_items))
+            print(len(unique_items))
             validation_checks.append(len(validated_items) == len(unique_items))
         print(validation_checks)
 
@@ -292,3 +295,40 @@ class KSValidator:
         )
         print(pdf_text, api_text, "similarity", similarity_score, inversed_similarity_score)
         return similarity_score > 80 or inversed_similarity_score > 80
+
+    def validate_license(self, page_data: KSAttributes):
+        license_text = page_data.isLicenseProduction
+        if isinstance(license_text, bool):
+            for file in page_data.files:
+                if file["decrypt_plain"] is None:
+                    continue
+                text_to_check = file["decrypt_plain"].lower().strip()
+                normalized_text = re.sub(r"\s+", " ", text_to_check)
+                text_to_check = normalized_text.strip()
+                pattern1 = r"лицензи".lower()
+                pattern2 = r"сертификат".lower()
+                if re.search(pattern1, text_to_check) and re.search(pattern2, text_to_check):
+                    return False
+            return True
+
+        else:
+
+            for file in page_data.files:
+                if file["decrypt_plain"] is None:
+                    continue
+                text_to_check = file["decrypt_plain"].lower().strip()
+                normalized_text = re.sub(r"\s+", " ", text_to_check)
+                text_to_check = normalized_text.strip()
+                licenses_indices = [i.start() for i in re.finditer("лицензи", text_to_check)]
+                certificate_indices = [i.start() for i in re.finditer("сертификат", text_to_check)]
+                for index in licenses_indices + certificate_indices:
+                    start_index = max(0, index - 100)
+                    end_index = min(len(text_to_check), index + 100)
+                    substring = normalized_text[start_index:end_index]
+                    similarity_score = fuzz.partial_ratio(page_data.name.lower(), substring.lower())
+                    print(similarity_score)
+                    if similarity_score > 70:
+                        return True
+                # if re.search(pattern, text_to_check):
+                #     return True
+            return False
