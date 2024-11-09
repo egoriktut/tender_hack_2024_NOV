@@ -48,9 +48,7 @@ class KSValidator:
             ValidationOption.VALIDATE_NAMING: self.validate_naming,
             ValidationOption.VALIDATE_PERFORM_CONTRACT_REQUIRED: self.validate_perform_contract_required,
             ValidationOption.VALIDATE_LICENSE: self.validate_license,
-            ValidationOption.VALIDATE_DELIVERY_GRAPHIC: lambda: bool(
-                random.randint(0, 1)
-            ),
+            ValidationOption.VALIDATE_DELIVERY_GRAPHIC: self.validate_delivery,
             ValidationOption.VALIDATE_PRICE: lambda: bool(random.randint(0, 1)),
             ValidationOption.VALIDATE_SPECIFICATIONS: self.validate_specifications,
         }
@@ -81,6 +79,10 @@ class KSValidator:
         }
 
         return validation_result
+
+    def validate_delivery(self, page_data: KSAttributes) -> ValidationOptionResult:
+        print(page_data.deliveries)
+        return ValidationOptionResult(status=False, description="")
 
     @staticmethod
     def number_to_words(number: float) -> str:
