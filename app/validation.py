@@ -213,7 +213,7 @@ class KSValidator:
                 "name": ["Наименование", "Название"],
                 "quantity": ["Кол.", "Кол-", "Кол-во", "Количество"],
                 "date": ["сроки", "срок", "Дата"],
-                "cost": ["Стоимость", "Цена", "Стоим."],
+                "cost": ["Стоимость", "Цена", "Стоим"],
             }
             deliveries = api_data.deliveries
             from collections import defaultdict
@@ -249,11 +249,12 @@ class KSValidator:
                         try:
                             name = row[col_name_mapper['name']]
                             quantity = row[col_name_mapper.get('quantity', None)]
+                            cost = row=[col_name_mapper.get('cost')]
                             date = row[col_name_mapper.get('date', None)]
-                            if (self.check_specification_name_equality(name, res_row['name'])
-                                and res_row['periodDaysTo'] in date
-                                and quantity == res_row['quantity']):
+                            print(self.check_similarity_transformer(name, res_row['name']), self.checkSpecDate(date, res_row["periodDaysTo"]), self.checkSpecCost(cost, res_row[cost]), self.checkSpecEquantity(quantity, res_row['quantity']))
+                            if self.check_similarity_transformer(name, res_row['name']) and self.checkSpecDate(date, res_row["periodDaysTo"]) and self.checkSpecCost(cost, res_row[cost]) and self.checkSpecEquantity(quantity, res_row['quantity']):
                                 validated_items.append(res_row)
+                        
                         except:
                             print("err")
                             break
@@ -264,7 +265,20 @@ class KSValidator:
 
         return all(validation_checks)
 
+    def checkSpecDate(self, pdf_date: str, api_date: str) -> bool:
+        if pdf_date is None or api_date is None:
+            return false
+        return api_date in pdf_date
 
+    def checkSpecCost(self, pdf_cost: str, api_cost: str) -> bool:
+        if pdf_cost is None or api_cost is None:
+            return False
+        return pdf_cost == api_cost
+    
+    def checkSpecEquantity(self, pdf_eq: str, api_eq: str) -> bool:
+        if pdf_eq is None or api_eq is None:
+            return False
+        return pdf_eq == api_eq
 
     # map columns name to col id
     @staticmethod
