@@ -7,6 +7,7 @@ import requests
 import random
 
 from fuzzywuzzy import fuzz
+from num2words import num2words
 
 from app.schemas.api import ValidationOption
 from app.schemas.ks import KSAttributes
@@ -36,7 +37,7 @@ class KSValidator:
     ) -> Dict[ValidationOption, bool]:
         validation_checks = {
             ValidationOption.VALIDATE_NAMING: self.validate_naming,
-            ValidationOption.VALIDATE_PERFORM_CONTRACT_REQUIRED: lambda: bool(random.randint(0, 1)),
+            ValidationOption.VALIDATE_PERFORM_CONTRACT_REQUIRED: self.validate_perform_contract_required,
             ValidationOption.VALIDATE_LICENSE: lambda: bool(random.randint(0, 1)),
             ValidationOption.VALIDATE_DELIVERY_GRAPHIC: lambda: bool(random.randint(0, 1)),
             ValidationOption.VALIDATE_PRICE: lambda: bool(random.randint(0, 1)),
@@ -47,7 +48,12 @@ class KSValidator:
         for file in page_data.files:
             self.download_file(file["downloads_link"], file["name"], page_data.auction_id)
             file_path = f'./resources/_{page_data.auction_id}_{file["name"]}'
-            file["decrypt"] = read_file(file_path)
+            text_pdf = read_file(file_path)
+            if text_pdf:
+                normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', '', text_pdf)
+                normalized_text = re.sub(r'\s+', ' ', normalized_text)
+                text_pdf = normalized_text.strip()
+            file["decrypt"] = text_pdf
             os.remove(file_path)
             try:
                 os.remove(f"{file_path}.decrypt")
@@ -64,12 +70,33 @@ class KSValidator:
 
         return validation_result
 
-    def validate_perform_contract_requerid(self, page_data: KSAttributes) -> bool:
-        if instanse(KSAttributes.isContractGuaranteeRequired, bool):
-            # проверяем что нет текста
-            pass
+    @staticmethod
+    def number_to_words(number: float) -> str:
+        rubles = int(number)
+        kopecks = int((number - rubles) * 100)
+
+        rubles_in_words = num2words(rubles, lang="ru").replace(" ", " ")
+        kopecks_in_words = num2words(kopecks, lang="ru").replace(" ", " ")
+
+        return f"{rubles} ({rubles_in_words}) рублей {kopecks:02d} ({kopecks_in_words}) копеек"
+
+    def validate_perform_contract_required(self, page_data: KSAttributes) -> bool:
+        if isinstance(page_data.isContractGuaranteeRequired, bool):
+            for file in page_data.files:
+                text_to_check = file["decrypt"]
+                pattern = r"Размер обеспечения исполнения Контракта составляет\s+\d+(?:\s\d+)*\sрублей\s\d{2}\sкопеек".lower()
+                if re.search(pattern, text_to_check):
+                    return False
+                return True
+
         else:
-            pass
+            for file in page_data.files:
+                expected_text = self.number_to_words(page_data.isContractGuaranteeRequired)
+                text_to_check = file["decrypt"].lower()
+                pattern = re.escape(f"Размер обеспечения исполнения Контракта составляет {expected_text}".lower())
+                if re.search(pattern, text_to_check):
+                    return True
+                return False
 
 
     def validate_naming(self, page_data: KSAttributes) -> bool:
@@ -77,19 +104,16 @@ class KSValidator:
             if not file["decrypt"] or not isinstance(file["decrypt"], str):
                 continue
             file_txt = file["decrypt"]
-            normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', '', file_txt)
-            normalized_text = re.sub(r'\s+', ' ', normalized_text)
-            normalized_text = normalized_text.strip()
 
             window = len(page_data.name) + 40
-            for start in range(0, min(200, len(str(normalized_text))), 10):
-                end = min(start + window, len(normalized_text) - 1)
-                similarity_score = fuzz.partial_ratio(page_data.name.lower(), normalized_text[start:end].lower())
+            for start in range(0, min(200, len(str(file_txt))), 10):
+                end = min(start + window, len(file_txt) - 1)
+                similarity_score = fuzz.partial_ratio(page_data.name.lower(), file_txt[start:end].lower())
                 print(f"LOLOLOL OMAGAD EEGORIK {similarity_score}, start {start} end {end}, name {page_data.name} ||| text {normalized_text[start:end]}")
                 if similarity_score > 70:
                     return True
 
-            tf_result = self.check_similarity_transformer(page_data.name, normalized_text[:50])
+            tf_result = self.check_similarity_transformer(page_data.name, file_txt[:50])
             if tf_result:
                 return True
 
