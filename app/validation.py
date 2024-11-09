@@ -241,15 +241,17 @@ class KSValidator:
                 continue
             for table in tables:
                 col_name_mapper: dict = self.map_pdf_columns(reference_col_name, table.df.iloc[0])
-
+                print(col_name_mapper)
                 for idx, res_row in enumerate(unique_items):
                     # dont touch header row
+
                     for index, row in table.df[1:].iterrows():
                         # try for invalid tables
                         try:
+                            print(row)
                             name = row[col_name_mapper['name']]
                             quantity = row[col_name_mapper.get('quantity', None)]
-                            cost = row=[col_name_mapper.get('cost')]
+                            cost = row=[col_name_mapper.get('cost', None)]
                             date = row[col_name_mapper.get('date', None)]
                             print(self.check_similarity_transformer(name, res_row['name']), self.checkSpecDate(date, res_row["periodDaysTo"]), self.checkSpecCost(cost, res_row[cost]), self.checkSpecEquantity(quantity, res_row['quantity']))
                             if self.check_similarity_transformer(name, res_row['name']) and self.checkSpecDate(date, res_row["periodDaysTo"]) and self.checkSpecCost(cost, res_row[cost]) and self.checkSpecEquantity(quantity, res_row['quantity']):
