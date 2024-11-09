@@ -322,8 +322,8 @@ class KSValidator:
                 licenses_indices = [i.start() for i in re.finditer("лицензи", text_to_check)]
                 certificate_indices = [i.start() for i in re.finditer("сертификат", text_to_check)]
                 for index in licenses_indices + certificate_indices:
-                    start_index = max(0, index - 50)
-                    end_index = min(len(text_to_check), index + 50)
+                    start_index = max(0, index - 30)
+                    end_index = min(len(text_to_check), index + 150)
                     substring = normalized_text[start_index:end_index]
                     similarity_score = fuzz.partial_ratio(page_data.name.lower(), substring.lower())
                     print(similarity_score)
