@@ -1,3 +1,4 @@
+import json
 import re
 import os
 from typing import Dict, List, Optional
@@ -52,22 +53,18 @@ class KSValidator:
                 file["downloads_link"], file["name"], page_data.auction_id
             )
             file_path = f'./resources/_{page_data.auction_id}_{file["name"]}'
-            text_pdf = read_file(file_path)
+            text_pdf, text_pdf_plain = read_file(file_path)
             file["decrypt"] = text_pdf
-            # file["tables"] = camelot.read_pdf(file_path, pages="all")
+            file["decrypt_plain"] = text_pdf_plain
             print("HERE")
-            print(text_pdf)
-            with open("cheeck", "w") as f:
-                f.write(text_pdf)
-            os.remove(file_path)
             try:
                 os.remove(f"{file_path}.decrypt")
             except FileNotFoundError:
                 pass
 
-        # output_file_path = f"./resources/{page_data.auction_id}_result.json"
-        # with open(output_file_path, "a+", encoding="utf-8") as f:
-        #     f.write(json.dumps(page_data.json(), ensure_ascii=False, indent=4))
+        output_file_path = f"./resources/{page_data.auction_id}_result.json"
+        with open(output_file_path, "a+", encoding="utf-8") as f:
+            f.write(json.dumps(page_data.json(), ensure_ascii=False, indent=4))
 
         validation_result = {
             option: validation_checks[option](page_data)
@@ -91,9 +88,9 @@ class KSValidator:
     def validate_perform_contract_required(self, page_data: KSAttributes) -> bool:
         if isinstance(page_data.isContractGuaranteeRequired, bool):
             for file in page_data.files:
-                if file["decrypt"] is None:
+                if file["decrypt_plain"] is None:
                     continue
-                text_to_check = file["decrypt"].lower().strip()
+                text_to_check = file["decrypt_plain"].lower().strip()
                 normalized_text = re.sub(r"\s+", " ", text_to_check)
                 text_to_check = normalized_text.strip()
                 pattern = r"размер обеспечения исполнения Контракта составляет\s+\d+(?:\s\d+)*\sрублей\s\d{2}\sкопеек".lower()
@@ -103,12 +100,12 @@ class KSValidator:
 
         else:
             for file in page_data.files:
-                if file["decrypt"] is None:
+                if file["decrypt_plain"] is None:
                     continue
                 expected_text = self.number_to_words(
                     page_data.isContractGuaranteeRequired
                 )
-                text_to_check = file["decrypt"].lower().strip()
+                text_to_check = file["decrypt_plain"].lower().strip()
                 normalized_text = re.sub(r"\s+", " ", text_to_check)
                 text_to_check = normalized_text.strip()
                 # print(text_to_check)
@@ -123,9 +120,9 @@ class KSValidator:
 
     def validate_naming(self, page_data: KSAttributes) -> bool:
         for file in page_data.files:
-            if not file["decrypt"] or not isinstance(file["decrypt"], str):
+            if not file["decrypt_plain"] or not isinstance(file["decrypt_plain"], str):
                 continue
-            file_txt = file["decrypt"]
+            file_txt = file["decrypt_plain"]
             print("BEEEFORE", file_txt[:100])
             normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', "", file_txt)
             normalized_text = re.sub(r"\s+", " ", normalized_text)
