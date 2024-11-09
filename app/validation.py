@@ -5,6 +5,8 @@ from typing import Dict, List, Optional
 import requests
 import random
 
+from fuzzywuzzy import fuzz
+
 from app.schemas.api import ValidationOption
 from app.schemas.ks import KSAttributes
 from app.utils.file_util import read_file
@@ -71,6 +73,12 @@ class KSValidator:
             normalized_text = re.sub(r'\s+', ' ', normalized_text)
             normalized_text = normalized_text.strip()[:300]
 
-            if page_data.name in normalized_text:
+            # if page_data.name in normalized_text:
+            #     return True
+
+            similarity_score = fuzz.partial_ratio(page_data.name.lower(), normalized_text.lower())
+            print(f"LOLOLOL OMAGAD EEGORIK {similarity_score}")
+            if similarity_score > 90:
                 return True
+
         return False
