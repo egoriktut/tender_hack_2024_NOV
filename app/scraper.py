@@ -18,9 +18,9 @@ from typing import List, Optional, Dict
 
 class ParserWeb:
 
-    def __init__(self, urls: List[str]) -> None:
-        self.urls: set = set(urls)
-        self.urls_with_attributes: Dict[str, Optional[KSAttributes]] = {}
+    def __init__(self, url: str) -> None:
+        self.url: str = url
+        self.attributes: Optional[KSAttributes] = None
 
     @staticmethod
     def is_real_url(url: str) -> bool:
@@ -56,21 +56,12 @@ class ParserWeb:
             return None
 
     def start(self) -> None:
-        for url in self.urls:
-            if self.is_real_url(url):
-                attr = self.get_attributes_ks(url)
-                if attr:
-                    self.urls_with_attributes[url] = self.get_attributes_ks(url)
+        if self.is_real_url(self.url):
+            attr = self.get_attributes_ks(self.url)
+            if attr:
+                self.attributes = self.get_attributes_ks(self.url)
 
-
-def fetch_and_parse(url: str) -> dict:
-    # Simulate a network delay for fetching and parsing
-    # web = ParserWeb(["https://zakupki.mos.ru/auction/9869986"])
-    # web.start()
-    # print(web.urls_with_attributes)
-
-    time.sleep(2)
-    return {
-        "title": "Mock Page Title",
-        "content": "This is the mock content of the page for testing."
-    }
+def fetch_and_parse(url: str) -> Optional[KSAttributes]:
+    parser = ParserWeb(url)
+    attributes = parser.get_attributes_ks(url)
+    return attributes

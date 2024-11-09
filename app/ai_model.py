@@ -1,13 +1,20 @@
 import time
-from typing import Dict, Any, Optional
-
+from typing import Dict, Any, Optional, List
+from app.schemas.ks import KSAttributes
+from app.schemas.api import ValidationOption
 
 class ModelInference:
     def __init__(self, model_path: Optional[str] = None) -> None:
         # No model loading needed for mock
         pass
 
-    def validate_content(self, content: str) -> Dict[str, Any]:
+    def validate_content(self, page_data: KSAttributes, validate_params: List[ValidationOption]) -> Dict[str, Any]:
         # Simulate a delay to mimic real model processing time
         time.sleep(2)
-        return {"mock_analysis": "This content appears valid and well-structured."}
+        # TODO: call model to compare
+        import random
+        result = {
+            str(id_param): bool(random.randint(0, 1))
+            for id_param in validate_params
+        }
+        return result
