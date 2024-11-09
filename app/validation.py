@@ -265,7 +265,7 @@ class KSValidator:
 
     def checkSpecDate(self, pdf_date: str, api_date: str) -> bool:
         if pdf_date is None or api_date is None:
-            return false
+            return False
         return api_date in pdf_date
 
     def checkSpecCost(self, pdf_cost: str, api_cost: str) -> bool:
