@@ -118,23 +118,24 @@ class KSValidator:
             if not file["decrypt"] or not isinstance(file["decrypt"], str):
                 continue
             file_txt = file["decrypt"]
+            print("BEEEFORE", file_txt[:100])
             normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', "", file_txt)
             normalized_text = re.sub(r"\s+", " ", normalized_text)
-            file_txt = normalized_text.strip()
+            normalized_text = normalized_text.strip()
 
             window = len(page_data.name) + 40
-            for start in range(0, min(200, len(str(file_txt))), 10):
-                end = min(start + window, len(file_txt) - 1)
+            for start in range(0, min(200, len(str(normalized_text))), 10):
+                end = min(start + window, len(normalized_text) - 1)
                 similarity_score = fuzz.partial_ratio(
-                    page_data.name.lower(), file_txt[start:end].lower()
+                    page_data.name.lower(), normalized_text[start:end].lower()
                 )
                 print(
-                    f"LOLOLOL OMAGAD EEGORIK {similarity_score}, start {start} end {end}, name {page_data.name} ||| text {file_txt[start:end]}"
+                    f"LOLOLOL OMAGAD EEGORIK {similarity_score}, start {start} end {end}, name {page_data.name} ||| text {normalized_text[start:end]}"
                 )
                 if similarity_score > 70:
                     return True
-
-            tf_result = self.check_similarity_transformer(page_data.name, file_txt[:50])
+            print("CHECE", normalized_text[:100])
+            tf_result = self.check_similarity_transformer(page_data.name, normalized_text[:100])
             if tf_result:
                 return True
 
