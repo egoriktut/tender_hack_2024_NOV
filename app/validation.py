@@ -159,11 +159,11 @@ class KSValidator:
 
             tf1_score = self.check_similarity_transformer(page_data.name, normalized_text[start_index:end_index])
             if tf1_score >= 0.75:
-                return ValidationOptionResult(status=True, description=str(tf1_score))
+                return ValidationOptionResult(status=True, description=f"{tf1_score:.0f}")
 
             tf2_score = self.check_similarity2_transformer(page_data.name, normalized_text[start_index:end_index])
             if tf2_score < 5:
-                return ValidationOptionResult(status=True, description=str(tf2_score))
+                return ValidationOptionResult(status=True, description=f"{tf2_score:.0f}")
 
         return ValidationOptionResult(status=False, description="")
 
@@ -193,14 +193,7 @@ class KSValidator:
         # Евклидово расстояние между векторами
         euclidean_distance = np.linalg.norm(interface_embedding - td_embedding)
         print(f"TRANFORMER BUMBELBIE {euclidean_distance}, name {name}, text {text}")
-
-        # Установим порог для сравнения
-        threshold = 5
-        # Вывод результата
-        if euclidean_distance < threshold:
-            return True
-        else:
-            return False
+        return euclidean_distance
 
     def validate_specifications(self, api_data: KSAttributes) -> ValidationOptionResult:
         validation_checks = []
