@@ -312,7 +312,6 @@ class KSValidator:
             return True
 
         else:
-
             for file in page_data.files:
                 if file["decrypt_plain"] is None:
                     continue
@@ -323,7 +322,7 @@ class KSValidator:
                 certificate_indices = [i.start() for i in re.finditer("сертификат", text_to_check)]
                 for index in licenses_indices + certificate_indices:
                     start_index = max(0, index - 30)
-                    end_index = min(len(text_to_check), index + 150)
+                    end_index = min(len(text_to_check), index + len(license_text))
                     substring = normalized_text[start_index:end_index]
                     similarity_score = fuzz.partial_ratio(page_data.name.lower(), substring.lower())
                     print(similarity_score)
