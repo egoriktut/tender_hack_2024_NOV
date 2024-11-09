@@ -16,7 +16,7 @@ from app.utils.file_util import read_file
 class KSValidator:
     def __init__(self, model_path: Optional[str] = None) -> None:
         # No model loading needed for mock
-        pass
+        self.model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
 
     @staticmethod
     def download_file(download_link: str, file_name: str, auction_id: int) -> None:
@@ -77,11 +77,11 @@ class KSValidator:
             for start in range(0, min(200, len(str(normalized_text))), 10):
                 end = min(start + window, len(normalized_text) - 1)
                 similarity_score = fuzz.partial_ratio(page_data.name.lower(), normalized_text[start:end].lower())
-                print(f"LOLOLOL OMAGAD EEGORIK {similarity_score}, start {start} end {end}, name {page_data.name}")
+                print(f"LOLOLOL OMAGAD EEGORIK {similarity_score}, start {start} end {end}, name {page_data.name} ||| text {normalized_text[start:end]}")
                 if similarity_score > 70:
                     return True
 
-            tf_result = self.check_similarity_transformer(page_data.name, normalized_text[:300])
+            tf_result = self.check_similarity_transformer(page_data.name, normalized_text[:50])
             if tf_result:
                 return True
 
@@ -92,16 +92,13 @@ class KSValidator:
         interface_name = name
         td_name = text
 
-        # Загрузка модели Sentence Transformers
-        model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
-
         # Преобразование текстов в векторы
-        interface_embedding = model.encode(interface_name, convert_to_tensor=True)
-        td_embedding = model.encode(td_name, convert_to_tensor=True)
+        interface_embedding = self.model.encode(interface_name, convert_to_tensor=True)
+        td_embedding = self.model.encode(td_name, convert_to_tensor=True)
 
         # Вычисление сходства
         similarity_score = util.cos_sim(interface_embedding, td_embedding).item()
-        print(f"TRANFORMER OPTIMUS {similarity_score}, name {name}")
+        print(f"TRANFORMER OPTIMUS {similarity_score}, name {name}, text {text}")
 
         # Установка порогового значения
         threshold = 0.75
