@@ -2,6 +2,8 @@ import json
 import re
 import os
 from typing import Dict, List, Optional
+
+from celery.bin.control import status
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
@@ -14,6 +16,7 @@ from fuzzywuzzy import fuzz
 from num2words import num2words
 import camelot
 from transformers.utils import download_url
+from transformers.utils.chat_template_utils import description_re
 from websockets.asyncio.server import serve
 
 from app.schemas.api import ValidationOption, ValidationOptionResult
@@ -154,18 +157,18 @@ class KSValidator:
                 f"LOLOLOL OMAGAD EEGORIK {similarity_score}, start {start_index} end {end_index}, name {page_data.name} ||| - text {normalized_text[start_index:end_index]}"
             )
             if similarity_score > 70:
-                return ValidationOptionResult(status=True, description=str(similarity_score))
+                return ValidationOptionResult(status=True, description=f"{similarity_score}%")
             print("CHECE", normalized_text[:200])
 
             tf1_score = self.check_similarity_transformer(page_data.name, normalized_text[start_index:end_index])
             if tf1_score >= 0.75:
-                return ValidationOptionResult(status=True, description=str(tf1_score))
+                return ValidationOptionResult(status=True, description=f"{tf1_score}%")
 
             tf2_score = self.check_similarity2_transformer(page_data.name, normalized_text[start_index:end_index])
             if tf2_score < 5:
-                return ValidationOptionResult(status=True, description=str(tf2_score))
+                return ValidationOptionResult(status=True, description=f"{tf2_score}%")
 
-        return ValidationOptionResult(status=False, description="")
+        return ValidationOptionResult(status=False, description="не найдено")
 
     def check_similarity_transformer(self, name: str, text: str) -> int:
         interface_name = name
@@ -321,8 +324,8 @@ class KSValidator:
                 pattern1 = r"\s*лицензи\s*"
                 pattern2 = r"\s*сертификат\s*"
                 if re.search(pattern1, text_to_check) and re.search(pattern2, text_to_check):
-                    return False
-            return True
+                    ValidationOptionResult(status=False, description="найдены совпадения")
+            return ValidationOptionResult(status=True, description="не найдено")
 
         else:
             max_similarity = 0
@@ -341,5 +344,5 @@ class KSValidator:
                     similarity_score = fuzz.partial_ratio(license_text.lower(), substring.lower())
                     max_similarity = max(max_similarity, similarity_score)
                     if similarity_score > 80:
-                        return True
-            return {False: max_similarity}
+                        return ValidationOptionResult(status=False, description=f"{max_similarity}%")
+            return ValidationOptionResult(status=False, description=f"{max_similarity}%")

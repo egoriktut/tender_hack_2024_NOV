@@ -108,13 +108,14 @@ function formatResult(result) {
     const reason = reasons.find(r => r.value === parseInt(key));
     return {
       label: reason.label,
-      status: value ? 'valid' : 'invalid',
+      status: value.status ? 'valid' : 'invalid',
+      description: value.description,
     };
   });
 }
 
 function resultLabelFormat(result) {
-  return Object.values(result.analysis).every(value => value === true);
+  return Object.values(result.analysis).every(value => value.status === true);
 }
 
 
@@ -178,6 +179,7 @@ function resultLabelFormat(result) {
                     <span :class="item.status === 'invalid' ? 'icon-cross' : 'icon-check'"></span>
                     <span :class="{ 'text-red': item.status === 'invalid', 'text-green': item.status === 'valid' }">
                       {{ item.label }}
+                      {{ item.description ? item.description : "" }}
                     </span>
                   </li>
                 </ul>
