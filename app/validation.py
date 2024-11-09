@@ -314,6 +314,7 @@ class KSValidator:
 
     def validate_license(self, page_data: KSAttributes):
         license_text = page_data.isLicenseProduction
+        print(license_text)
         if isinstance(license_text, bool):
             for file in page_data.files:
                 if file["decrypt_plain"] is None:
@@ -321,8 +322,8 @@ class KSValidator:
                 text_to_check = file["decrypt_plain"].lower().strip()
                 normalized_text = re.sub(r"\s+", " ", text_to_check)
                 text_to_check = normalized_text.strip()
-                pattern1 = r"лицензи".lower()
-                pattern2 = r"сертификат".lower()
+                pattern1 = r"\s*лицензи\s*"
+                pattern2 = r"\s*сертификат\s*"
                 if re.search(pattern1, text_to_check) and re.search(pattern2, text_to_check):
                     return False
             return True
@@ -337,13 +338,11 @@ class KSValidator:
                 licenses_indices = [i.start() for i in re.finditer("лицензи", text_to_check)]
                 certificate_indices = [i.start() for i in re.finditer("сертификат", text_to_check)]
                 for index in licenses_indices + certificate_indices:
-                    start_index = max(0, index - 10)
-                    end_index = min(len(text_to_check), index + len(license_text))
+                    start_index = max(0, index - 5)
+                    end_index = min(len(text_to_check), index + len(license_text) - 5)
                     substring = normalized_text[start_index:end_index]
                     similarity_score = fuzz.partial_ratio(page_data.name.lower(), substring.lower())
                     print(similarity_score)
                     if similarity_score > 70:
                         return True
-                # if re.search(pattern, text_to_check):
-                #     return True
             return False
