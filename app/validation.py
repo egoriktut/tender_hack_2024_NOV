@@ -2,6 +2,8 @@ import json
 import re
 import os
 from typing import Dict, List, Optional
+
+import numpy as np
 from sentence_transformers import SentenceTransformer, util
 
 import requests
@@ -18,7 +20,6 @@ from app.utils.file_util import read_file
 
 class KSValidator:
     def __init__(self, model_path: Optional[str] = None) -> None:
-        # No model loading needed for mock
         self.model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
 
     @staticmethod
@@ -151,7 +152,7 @@ class KSValidator:
             if similarity_score > 70:
                 return True
             print("CHECE", normalized_text[:200])
-            tf_result = self.check_similarity_transformer(page_data.name, normalized_text[start_index:end_index])
+            tf_result = self.check_similarity2_transformer(page_data.name, normalized_text[start_index:end_index])
             if tf_result:
                 return True
 
@@ -173,6 +174,26 @@ class KSValidator:
         threshold = 0.75
         # Вывод результата
         if similarity_score >= threshold:
+            return True
+        else:
+            return False
+
+    def check_similarity2_transformer(self, name: str, text: str) -> bool:
+        # Тексты для проверки
+        interface_name = name
+        td_name = text
+
+        # Получение векторов
+        interface_embedding = self.model.encode(interface_name)
+        td_embedding = self.model.encode(td_name)
+
+        # Евклидово расстояние между векторами
+        euclidean_distance = np.linalg.norm(interface_embedding - td_embedding)
+
+        # Установим порог для сравнения
+        threshold = 75
+        # Вывод результата
+        if euclidean_distance >= threshold:
             return True
         else:
             return False
