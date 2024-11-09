@@ -1,4 +1,5 @@
 import re
+import os
 from typing import Dict, List, Optional
 
 import requests
@@ -15,14 +16,13 @@ class KSValidator:
         pass
 
     @staticmethod
-    def download_file(download_link: str, file_name: str) -> None:
+    def download_file(download_link: str, file_name: str, auction_id: int) -> None:
         response = requests.get(download_link, stream=True)
         response.raise_for_status()
-        import os
 
         os.makedirs("resources", exist_ok=True)
 
-        file_path = f"./resources/{file_name}"
+        file_path = f"./resources/_{auction_id}_{file_name}"
         with open(file_path, "wb") as file:
             for chunk in response.iter_content(chunk_size=8192):
                 if chunk:
@@ -42,9 +42,18 @@ class KSValidator:
         }
 
         for file in page_data.files:
-            self.download_file(file["downloads_link"], file["name"])
-            file["decrypt"] = read_file(f'./resources/{file["name"]}')
+            self.download_file(file["downloads_link"], file["name"], page_data.auction_id)
+            file_path = f'./resources/_{page_data.auction_id}_{file["name"]}'
+            file["decrypt"] = read_file(file_path)
+            os.remove(file_path)
+            try:
+                os.remove(f"{file_path}.decrypt")
+            except FileNotFoundError:
+                pass
 
+        # output_file_path = f"./resources/{page_data.auction_id}_result.json"
+        # with open(output_file_path, "a+", encoding="utf-8") as f:
+        #     f.write(json.dumps(page_data.json(), ensure_ascii=False, indent=4))
 
         validation_result = {
             option: validation_checks[option](page_data) for option in validate_params if option in validation_checks
