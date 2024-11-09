@@ -214,6 +214,7 @@ class KSValidator:
 
         # Вычисление косинусного сходства
         similarity_score = cosine_similarity(tfidf_matrix[0], tfidf_matrix[1])[0][0]
+        print(f"TRANFORMER OPTIMUS {similarity_score}, name {name}, text {text}")
 
         # Установим порог для сравнения
         threshold = 0.7
