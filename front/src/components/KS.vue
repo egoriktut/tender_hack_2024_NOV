@@ -127,7 +127,7 @@ function toggleSelectAll(event) {
 }
 
 const sendReportMock = (url) => {
-  alert(`Отправка отчета ${url}`)
+  alert(`Отправка отчета по КС ${url}`)
 }
 </script>
 
