@@ -27,6 +27,7 @@ class ParserWeb:
                 ).content.decode()
             )
             result = KSAttributes(
+                auction_id=auction_id,
                 files=[
                     {
                         "name": file["name"],
@@ -35,11 +36,11 @@ class ParserWeb:
                     for file in result["files"]
                 ],
                 name=result["name"],
-                isContractGuaranteeRequired=result["isContractGuaranteeRequired"],
-                isLicenseProduction=result["isLicenseProduction"],
+                isContractGuaranteeRequired=result["contractGuaranteeAmount"] if result["isContractGuaranteeRequired"] else False,
+                isLicenseProduction=result["uploadLicenseDocumentsComment"] if result["isLicenseProduction"] else False,
                 deliveries=result["deliveries"],
                 startCost=result["startCost"],
-                nextCost=result["nextCost"],
+                contractCost=result["contractCost"],
             )
             return result
         except Exception as e:
