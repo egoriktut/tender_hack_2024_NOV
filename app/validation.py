@@ -57,6 +57,8 @@ class KSValidator:
             # file["tables"] = camelot.read_pdf(file_path, pages="all")
             print("HERE")
             print(text_pdf)
+            with open("cheeck", "w") as f:
+                f.write(text_pdf)
             os.remove(file_path)
             try:
                 os.remove(f"{file_path}.decrypt")
