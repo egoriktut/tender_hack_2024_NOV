@@ -325,6 +325,7 @@ class KSValidator:
             return True
 
         else:
+            max_similarity = 0
             for file in page_data.files:
                 if file["decrypt_plain"] is None:
                     continue
@@ -338,6 +339,7 @@ class KSValidator:
                     end_index = min(len(text_to_check), index + len(license_text) - 5)
                     substring = normalized_text[start_index:end_index]
                     similarity_score = fuzz.partial_ratio(license_text.lower(), substring.lower())
+                    max_similarity = max(max_similarity, similarity_score)
                     if similarity_score > 80:
                         return True
-            return False
+            return {False: max_similarity}
