@@ -54,10 +54,6 @@ class KSValidator:
             )
             file_path = f'./resources/_{page_data.auction_id}_{file["name"]}'
             text_pdf = read_file(file_path)
-            if text_pdf:
-                normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', "", text_pdf)
-                normalized_text = re.sub(r"\s+", " ", normalized_text)
-                text_pdf = normalized_text.strip()
             file["decrypt"] = text_pdf
             os.remove(file_path)
             try:
@@ -91,6 +87,8 @@ class KSValidator:
     def validate_perform_contract_required(self, page_data: KSAttributes) -> bool:
         if isinstance(page_data.isContractGuaranteeRequired, bool):
             for file in page_data.files:
+                if file["decrypt"] is None:
+                    continue
                 text_to_check = file["decrypt"]
                 pattern = r"Размер обеспечения исполнения Контракта составляет\s+\d+(?:\s\d+)*\sрублей\s\d{2}\sкопеек".lower()
                 if re.search(pattern, text_to_check):
@@ -99,13 +97,17 @@ class KSValidator:
 
         else:
             for file in page_data.files:
+                if file["decrypt"] is None:
+                    continue
                 expected_text = self.number_to_words(
                     page_data.isContractGuaranteeRequired
                 )
                 text_to_check = file["decrypt"].lower()
+                print(text_to_check)
                 pattern = re.sub(r"\s+", r"\\s*", re.escape(
                     f"Размер обеспечения исполнения Контракта составляет {expected_text}"
                 ).lower())
+                print(pattern)
                 if re.search(pattern, text_to_check):
                     return True
                 return False
@@ -115,6 +117,9 @@ class KSValidator:
             if not file["decrypt"] or not isinstance(file["decrypt"], str):
                 continue
             file_txt = file["decrypt"]
+            normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', "", file_txt)
+            normalized_text = re.sub(r"\s+", " ", normalized_text)
+            file_txtg = normalized_text.strip()
 
             window = len(page_data.name) + 40
             for start in range(0, min(200, len(str(file_txt))), 10):
