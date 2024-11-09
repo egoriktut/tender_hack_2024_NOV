@@ -93,6 +93,9 @@ class KSValidator:
                 if file["decrypt"] is None:
                     continue
                 text_to_check = file["decrypt"]
+                # normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', "", text_to_check)
+                # normalized_text = re.sub(r"\s+", " ", normalized_text)
+                # text_to_check = normalized_text.strip()
                 pattern = r"Размер обеспечения исполнения Контракта составляет\s+\d+(?:\s\d+)*\sрублей\s\d{2}\sкопеек".lower()
                 if re.search(pattern, text_to_check):
                     return False
@@ -106,10 +109,12 @@ class KSValidator:
                     page_data.isContractGuaranteeRequired
                 )
                 text_to_check = file["decrypt"].lower().strip()
+                # print(text_to_check)
                 pattern = (
                     r"размер\s*обеспечения\s*исполнения\s*контракта\s*составляет\s*"
-                    r"30\s*000\s*\(тридцать\s*тысяч\)\s*рублей\s*00\s*\(ноль\)\s*копеек"
+                    + re.escape(expected_text)
                 )
+                # print(pattern)
                 if re.search(pattern, text_to_check):
                     return True
             return False
