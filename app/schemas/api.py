@@ -34,9 +34,14 @@ class AnalyzeUrlResponse(BaseModel):
     status: str
 
 
+class ValidationOptionResult(BaseModel):
+    status: bool
+    description: str
+
+
 class Result(BaseModel):
     url: str
-    analysis: Dict[ValidationOption, bool]
+    analysis: Dict[ValidationOption, ValidationOptionResult]
 
 
 class AnalysisResultResponse(BaseModel):

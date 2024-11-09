@@ -15,7 +15,7 @@ from num2words import num2words
 import camelot
 from transformers.utils import download_url
 
-from app.schemas.api import ValidationOption
+from app.schemas.api import ValidationOption, ValidationOptionResult
 from app.schemas.ks import KSAttributes
 from app.utils.file_util import read_file
 
@@ -39,7 +39,7 @@ class KSValidator:
 
     def validate_content(
         self, page_data: KSAttributes, validate_params: List[ValidationOption]
-    ) -> Dict[ValidationOption, bool]:
+    ) -> Dict[ValidationOption, ValidationOptionResult]:
         validation_checks = {
             ValidationOption.VALIDATE_NAMING: self.validate_naming,
             ValidationOption.VALIDATE_PERFORM_CONTRACT_REQUIRED: self.validate_perform_contract_required,
@@ -89,7 +89,7 @@ class KSValidator:
 
         return f"{rubles_formatted} ({rubles_in_words}) рублей {kopecks:02d} ({kopecks_in_words}) копеек"
 
-    def validate_perform_contract_required(self, page_data: KSAttributes) -> bool:
+    def validate_perform_contract_required(self, page_data: KSAttributes) -> ValidationOptionResult:
         if isinstance(page_data.isContractGuaranteeRequired, bool):
             for file in page_data.files:
                 if file["decrypt_plain"] is None:
@@ -99,8 +99,8 @@ class KSValidator:
                 text_to_check = normalized_text.strip()
                 pattern = r"размер обеспечения исполнения Контракта составляет\s+\d+(?:\s\d+)*\sрублей\s\d{2}\sкопеек".lower()
                 if re.search(pattern, text_to_check):
-                    return False
-            return True
+                    return ValidationOptionResult(status=False, description="")
+            return ValidationOptionResult(status=True, description="")
 
         else:
             for file in page_data.files:
@@ -119,10 +119,10 @@ class KSValidator:
                 )
                 # print(pattern)
                 if re.search(pattern, text_to_check):
-                    return True
-            return False
+                    return ValidationOptionResult(status=True, description="")
+            return ValidationOptionResult(status=False, description="")
 
-    def validate_naming(self, page_data: KSAttributes) -> bool:
+    def validate_naming(self, page_data: KSAttributes) -> ValidationOptionResult:
         for file in page_data.files:
             if not file["decrypt_plain"] or not isinstance(file["decrypt_plain"], str):
                 continue
@@ -153,18 +153,20 @@ class KSValidator:
                 f"LOLOLOL OMAGAD EEGORIK {similarity_score}, start {start_index} end {end_index}, name {page_data.name} ||| - text {normalized_text[start_index:end_index]}"
             )
             if similarity_score > 70:
-                return True
+                return ValidationOptionResult(status=True, description=str(similarity_score))
             print("CHECE", normalized_text[:200])
-            tf1_result = self.check_similarity_transformer(page_data.name, normalized_text[start_index:end_index])
-            if tf1_result:
-                return True
-            tf2_result = self.check_similarity2_transformer(page_data.name, normalized_text[start_index:end_index])
-            if tf2_result:
-                return True
 
-        return False
+            tf1_score = self.check_similarity_transformer(page_data.name, normalized_text[start_index:end_index])
+            if tf1_score >= 0.75:
+                return ValidationOptionResult(status=True, description=str(tf1_score))
 
-    def check_similarity_transformer(self, name: str, text: str) -> bool:
+            tf2_score = self.check_similarity2_transformer(page_data.name, normalized_text[start_index:end_index])
+            if tf2_score < 5:
+                return ValidationOptionResult(status=True, description=str(tf2_score))
+
+        return ValidationOptionResult(status=False, description="")
+
+    def check_similarity_transformer(self, name: str, text: str) -> int:
         interface_name = name
         td_name = text
 
@@ -176,15 +178,9 @@ class KSValidator:
         similarity_score = util.cos_sim(interface_embedding, td_embedding).item()
         print(f"TRANFORMER OPTIMUS {similarity_score}, name {name}, text {text}")
 
-        # Установка порогового значения
-        threshold = 0.75
-        # Вывод результата
-        if similarity_score >= threshold:
-            return True
-        else:
-            return False
+        return similarity_score
 
-    def check_similarity2_transformer(self, name: str, text: str) -> bool:
+    def check_similarity2_transformer(self, name: str, text: str) -> int:
         # Тексты для проверки
         interface_name = name
         td_name = text
@@ -205,7 +201,7 @@ class KSValidator:
         else:
             return False
 
-    def validate_specifications(self, api_data: KSAttributes):
+    def validate_specifications(self, api_data: KSAttributes) -> ValidationOptionResult:
         validation_checks = []
         for file in api_data.files:
             reference_col_name = {
@@ -259,7 +255,7 @@ class KSValidator:
             validation_checks.append(len(validated_items) == len(unique_items))
         print(validation_checks)
 
-        return all(validation_checks)
+        return ValidationOptionResult(status=all(validation_checks), description="")
 
 
 
