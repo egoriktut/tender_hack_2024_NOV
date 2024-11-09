@@ -122,6 +122,8 @@ class KSValidator:
         for file in page_data.files:
             if not file["decrypt_plain"] or not isinstance(file["decrypt_plain"], str):
                 continue
+            if not file["name"].endswith(".doc") and not file["name"].endswith(".docx"):
+                continue
             file_txt = file["decrypt_plain"]
             normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', "", file_txt)
             normalized_text = re.sub(r"\s+", " ", normalized_text)
@@ -138,7 +140,7 @@ class KSValidator:
                     page_data.name.lower(), normalized_text[start_index:end].lower()
                 )
                 print(
-                    f"LOLOLOL OMAGAD EEGORIK {similarity_score}, start {start_index} end {end}, name {page_data.name} ||| text {normalized_text[start_index:end]}"
+                    f"LOLOLOL OMAGAD EEGORIK {similarity_score}, start {start_index} end {end}, name {page_data.name} ||| START {start_index} - text {normalized_text[start_index:end]}"
                 )
                 if similarity_score > 70:
                     return True
