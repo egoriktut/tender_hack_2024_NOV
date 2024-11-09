@@ -126,6 +126,9 @@ function toggleSelectAll(event) {
   }
 }
 
+const sendReportMock = (url) => {
+  alert(`Отправка отчета ${url}`)
+}
 </script>
 
 <template>
@@ -205,7 +208,7 @@ function toggleSelectAll(event) {
                   style="width: 80%; margin-top: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
                 ></textarea>
                 <button
-                  @click="() => {alert(`Отправка отчета ${task.url}`)}"
+                  @click="sendReportMock(task.url)"
                   style="margin-top: 10px; padding: 8px; background-color: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer;"
                 >
                   Отправить отчет
