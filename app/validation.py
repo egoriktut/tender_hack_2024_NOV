@@ -255,7 +255,8 @@ class KSValidator:
 
             tables = file["pandas_tables"]
             validated_items: List = []
-
+            if tables is None:
+                continue
             for table in tables:
                 col_name_mapper: dict = self.map_pdf_columns(reference_col_name, table.df.iloc[0])
 
