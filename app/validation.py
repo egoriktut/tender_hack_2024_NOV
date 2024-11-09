@@ -189,6 +189,7 @@ class KSValidator:
 
         # Евклидово расстояние между векторами
         euclidean_distance = np.linalg.norm(interface_embedding - td_embedding)
+        print(f"TRANFORMER OPTIMUS {euclidean_distance}, name {name}, text {text}")
 
         # Установим порог для сравнения
         threshold = 75
