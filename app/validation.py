@@ -74,8 +74,7 @@ class KSValidator:
             normalized_text = normalized_text.strip()
 
             window = len(page_data.name) + 40
-            print("is ok")
-            for start in range(min(200, len(str(normalized_text))), 10):
+            for start in range(0, min(200, len(str(normalized_text))), 10):
                 end = min(start + window, len(normalized_text) - 1)
                 similarity_score = fuzz.partial_ratio(page_data.name.lower(), normalized_text[start:end].lower())
                 print(f"LOLOLOL OMAGAD EEGORIK {similarity_score}, start {start} end {end}, name {page_data.name}")
