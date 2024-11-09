@@ -207,7 +207,7 @@ class KSValidator:
                 or "т3" in file["name"].lower()
                 or ("техническое" in file["name"].lower() and "задание" in file["name"].lower())
             ):
-                return ValidationOptionResult(status=False, description="нет ТЗ")
+                continue
             reference_col_name = {
                 "name": ["Наименование", "Название"],
                 "quantity": ["Кол.", "Кол-", "Кол-во", "Количество"],
@@ -263,9 +263,8 @@ class KSValidator:
             print(len(validated_items))
             print(len(unique_items))
             validation_checks.append(len(validated_items) == len(unique_items))
-        print(validation_checks)
-
-        return ValidationOptionResult(status=all(validation_checks), description="")
+            return ValidationOptionResult(status=all(validation_checks), description="")
+        return ValidationOptionResult(status=False, description="нет ТЗ")
 
     def checkSpecDate(self, pdf_date: str, api_date: str) -> bool:
         if pdf_date is None or api_date is None:
