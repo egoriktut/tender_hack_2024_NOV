@@ -344,5 +344,5 @@ class KSValidator:
                     similarity_score = fuzz.partial_ratio(license_text.lower(), substring.lower())
                     max_similarity = max(max_similarity, similarity_score)
                     if similarity_score > 80:
-                        return ValidationOptionResult(status=False, description=f"{max_similarity}%")
+                        return ValidationOptionResult(status=True, description=f"{max_similarity}%")
             return ValidationOptionResult(status=False, description=f"{max_similarity}%")
