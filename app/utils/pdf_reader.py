@@ -22,7 +22,7 @@ def parse_pdf_tables(pdf_path):
     output_file_path = os.path.join(output_dir, os.path.basename(pdf_path) + ".decrypt")
 
     tables = camelot.read_pdf(pdf_path, pages="all", flavor="stream")
-
+    print("rel tables", len(tables), tables)
     horizontal_tables = []
     vertical_tables = []
 
@@ -46,5 +46,6 @@ def parse_pdf_tables(pdf_path):
                     .replace("  ", " ")
                     + "\n"
                 )
-
+    print("horizontal_tables", horizontal_tables)
+    print("vertical_tables", vertical_tables)
     return tables
