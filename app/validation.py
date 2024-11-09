@@ -82,10 +82,11 @@ class KSValidator:
         rubles = int(number)
         kopecks = int((number - rubles) * 100)
 
+        rubles_formatted = f"{rubles:,}".replace(",", " ")
         rubles_in_words = num2words(rubles, lang="ru").replace(" ", " ")
         kopecks_in_words = num2words(kopecks, lang="ru").replace(" ", " ")
 
-        return f"{rubles} ({rubles_in_words}) рублей {kopecks:02d} ({kopecks_in_words}) копеек"
+        return f"{rubles_formatted} ({rubles_in_words}) рублей {kopecks:02d} ({kopecks_in_words}) копеек"
 
     def validate_perform_contract_required(self, page_data: KSAttributes) -> bool:
         if isinstance(page_data.isContractGuaranteeRequired, bool):
@@ -102,9 +103,9 @@ class KSValidator:
                     page_data.isContractGuaranteeRequired
                 )
                 text_to_check = file["decrypt"].lower()
-                pattern = re.escape(
-                    f"Размер обеспечения исполнения Контракта составляет {expected_text}".lower()
-                )
+                pattern = re.sub(r"\s+", r"\\s*", re.escape(
+                    f"Размер обеспечения исполнения Контракта составляет {expected_text}"
+                ).lower())
                 if re.search(pattern, text_to_check):
                     return True
                 return False
