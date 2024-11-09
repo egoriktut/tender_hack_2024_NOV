@@ -64,6 +64,14 @@ class KSValidator:
 
         return validation_result
 
+    def validate_perform_contract_requerid(self, page_data: KSAttributes) -> bool:
+        if instanse(KSAttributes.isContractGuaranteeRequired, bool):
+            # проверяем что нет текста
+            pass
+        else:
+            pass
+
+
     def validate_naming(self, page_data: KSAttributes) -> bool:
         for file in page_data.files:
             if not file["decrypt"] or not isinstance(file["decrypt"], str):
