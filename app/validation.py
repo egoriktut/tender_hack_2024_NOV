@@ -220,7 +220,8 @@ class KSValidator:
                     aggregated_items[name]["sum"] += item["sum"]
                     aggregated_items[name]["quantity"] += item["quantity"]
                     aggregated_items[name]["costPerUnit"] = item["costPerUnit"]
-
+            print("AGGREEGATED")
+            print(aggregated_items)
             unique_items = list(aggregated_items.values())
 
 
