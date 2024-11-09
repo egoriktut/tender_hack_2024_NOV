@@ -11,10 +11,10 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 redis-server
-celery -A app.celery_app worker --loglevel=info
+celery -A app.celery_app worker --loglevel=debug
 
 фастапи поднять
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8090
 
 
 тупо баш, над[README.md](README.md)еемся что сразуу стартанет

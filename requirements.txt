@@ -10,3 +10,6 @@ redis
 types-requests
 pydantic-settings
 mypy
+camelot-py
+pandas
+opencv-python

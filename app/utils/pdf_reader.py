@@ -26,7 +26,7 @@ def parse_pdf_tables(pdf_path):
     horizontal_tables = []
     vertical_tables = []
 
-    with open(output_file_path, "w") as answer:
+    with open(output_file_path, "w", encoding="utf-8") as answer:
         for i, table in enumerate(tables):
             df = table.df
             if df.shape[1] > df.shape[0]:
