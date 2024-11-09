@@ -1,20 +1,9 @@
 import json
-import time
-from typing import Dict, List, Optional
+from typing import Optional
 
 import requests
-from bs4 import BeautifulSoup
 
 from app.schemas.ks import KSAttributes
-
-# def fetch_and_parse(url: str) -> dict:
-#     response = requests.get(url)
-#     soup = BeautifulSoup(response.text, 'html.parser')
-#
-#     title = soup.find('title').get_text()
-#     content = soup.get_text()
-#
-#     return {"title": title, "content": content}
 
 
 class ParserWeb:

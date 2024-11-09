@@ -1,10 +1,9 @@
-from typing import Any, Dict, List
+from typing import Dict, List
 
 from app.ai_model import ModelInference
 from app.celery_app import celery_app
 from app.config import settings
-from app.schemas.api import (AnalyzeUrlRequest, Optional, Result,
-                             ValidationOption)
+from app.schemas.api import Result, ValidationOption
 from app.scraper import fetch_and_parse
 
 model_inference = ModelInference(settings.MODEL_PATH)

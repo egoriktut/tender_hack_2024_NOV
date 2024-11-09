@@ -1,7 +1,7 @@
-from typing import Dict, List
+from typing import Dict
 
 from celery.result import AsyncResult
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
 from app.schemas.api import (AnalysisResultResponse, AnalyzeUrlRequest,
                              AnalyzeUrlResponse)
