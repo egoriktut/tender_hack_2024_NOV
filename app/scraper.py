@@ -1,10 +1,11 @@
-from bs4 import BeautifulSoup
-import requests
 import json
-from app.schemas.ks import KSAttributes
 import time
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
+import requests
+from bs4 import BeautifulSoup
+
+from app.schemas.ks import KSAttributes
 
 # def fetch_and_parse(url: str) -> dict:
 #     response = requests.get(url)
@@ -60,6 +61,7 @@ class ParserWeb:
             attr = self.get_attributes_ks(self.url)
             if attr:
                 self.attributes = self.get_attributes_ks(self.url)
+
 
 def fetch_and_parse(url: str) -> Optional[KSAttributes]:
     parser = ParserWeb(url)
