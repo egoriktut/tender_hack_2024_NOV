@@ -236,25 +236,25 @@ class KSValidator:
                 print(item)
 
             tables = file["pandas_tables"]
-            print(tables)
+            print("tablee", tables)
             validated_items: List = []
             if tables is None:
                 continue
             for table in tables:
                 col_name_mapper: dict = self.map_pdf_columns(reference_col_name, table.df.iloc[0])
-                print(col_name_mapper)
+                print("col mapa", col_name_mapper)
                 for idx, res_row in enumerate(unique_items):
                     # dont touch header row
-                    print(idx, res_row)
+                    print("MEEMEE", idx, res_row)
                     for index, row in table.df[1:].iterrows():
                         # try for invalid tables
+                        print("ROW", row)
                         try:
-                            print(row)
                             name = row.get(col_name_mapper['name'], None)
                             quantity = row.get(col_name_mapper.get('quantity', None), None)
                             cost = row.get(col_name_mapper.get('cost', None), None)
                             date = row.get(col_name_mapper.get('date', None), None)
-                            print(self.check_similarity_transformer(name, res_row['name']), self.checkSpecDate(date, res_row["periodDaysTo"]), self.checkSpecCost(cost, res_row[cost]), self.checkSpecEquantity(quantity, res_row['quantity']))
+                            print("HUNYA",self.check_similarity_transformer(name, res_row['name']), self.checkSpecDate(date, res_row["periodDaysTo"]), self.checkSpecCost(cost, res_row[cost]), self.checkSpecEquantity(quantity, res_row['quantity']))
                             if self.check_similarity_transformer(name, res_row['name']) and self.checkSpecDate(date, res_row["periodDaysTo"]) and self.checkSpecCost(cost, res_row[cost]) and self.checkSpecEquantity(quantity, res_row['quantity']):
                                 validated_items.append(res_row)
                         
