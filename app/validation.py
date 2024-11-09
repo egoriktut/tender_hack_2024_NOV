@@ -1,7 +1,7 @@
 import re
 import os
 from typing import Dict, List, Optional
-# from sentence_transformers import SentenceTransformer, util
+from sentence_transformers import SentenceTransformer, util
 
 import requests
 import random
@@ -81,4 +81,32 @@ class KSValidator:
                 if similarity_score > 70:
                     return True
 
+            tf_result = self.check_similarity_transformer(page_data.name, normalized_text[:300])
+            if tf_result:
+                return True
+
+
         return False
+
+    def check_similarity_transformer(self, name: str, text: str) -> bool:
+        interface_name = name
+        td_name = text
+
+        # Загрузка модели Sentence Transformers
+        model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+
+        # Преобразование текстов в векторы
+        interface_embedding = model.encode(interface_name, convert_to_tensor=True)
+        td_embedding = model.encode(td_name, convert_to_tensor=True)
+
+        # Вычисление сходства
+        similarity_score = util.cos_sim(interface_embedding, td_embedding).item()
+        print(f"TRANFORMER OPTIMUS {similarity_score}, name {name}")
+
+        # Установка порогового значения
+        threshold = 0.75
+        # Вывод результата
+        if similarity_score >= threshold:
+            return True
+        else:
+            return False
