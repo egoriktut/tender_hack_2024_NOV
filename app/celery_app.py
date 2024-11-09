@@ -1,4 +1,5 @@
 from celery import Celery
+
 from app.config import settings  # Use absolute import
 
 celery_app = Celery("app", broker=settings.BROKER_URL, backend=settings.BACKEND_URL)
@@ -11,4 +12,6 @@ celery_app.conf.update(
     enable_utc=True,
 )
 
-celery_app.autodiscover_tasks(["app.tasks"])  # Automatically discover tasks in app.tasks
+celery_app.autodiscover_tasks(
+    ["app.tasks"]
+)  # Automatically discover tasks in app.tasks

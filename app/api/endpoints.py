@@ -1,8 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from typing import Dict, List
+
 from celery.result import AsyncResult
+from fastapi import APIRouter, HTTPException
+
+from app.schemas.api import (AnalysisResultResponse, AnalyzeUrlRequest,
+                             AnalyzeUrlResponse)
 from app.tasks import start_analysis_task
-from app.schemas.api import AnalyzeUrlRequest, AnalyzeUrlResponse, AnalysisResultResponse
-from typing import List, Dict
 
 router = APIRouter()
 

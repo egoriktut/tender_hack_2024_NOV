@@ -1,7 +1,7 @@
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
-from typing import Optional, Dict, Any, List
 
 
 class ValidationOption(int, Enum):
@@ -19,7 +19,7 @@ class ValidationOption(int, Enum):
             3: "Наличие сертификатов/лицензий",
             4: "График поставки И этап поставки",
             5: "Максимальное значение цены контракта ИЛИ начальная цена",
-            6: "Спецификации"
+            6: "Спецификации",
         }
         return descriptions.get(self.value, "Unknown validation")
 
