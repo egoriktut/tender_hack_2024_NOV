@@ -102,6 +102,22 @@ async function checkKS() {
   }
 
 }
+
+function formatResult(result) {
+  return Object.entries(result.analysis).map(([key, value]) => {
+    const reason = reasons.find(r => r.value === parseInt(key));
+    return {
+      label: reason.label,
+      status: value ? 'valid' : 'invalid',
+    };
+  });
+}
+
+function resultLabelFormat(result) {
+  return Object.values(result.analysis).every(value => value === true);
+}
+
+
 </script>
 
 <template>
@@ -141,17 +157,37 @@ async function checkKS() {
             {{ task.url }} <span class="loader"></span>
           </template>
 
-          <template v-else-if="task.status === 'completed'">
-            <details>
-              <summary>
-                <a :href="task.url" target="_blank" rel="noopener noreferrer">{{ task.url }}</a>
-              </summary>
-              <pre>{{ task.result }}</pre>
-            </details>
+          <template v-if="task.status === 'completed'">
+            <div class="task-status">
+              <label :class="{ 'text-green': resultLabelFormat(task.result), 'text-red': !resultLabelFormat(task.result) }">
+                {{ resultLabelFormat(task.result) ? 'КС корректна' : 'КС должна быть снята' }}
+              </label>
+              <details class="result-details">
+                <summary>
+                  <a
+                    :href="task.url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    :class="{ 'link-green': resultLabelFormat(task.result) }"
+                  >
+                    {{ task.url }}
+                  </a>
+                </summary>
+                <ul class="analysis-list">
+                  <li v-for="item in formatResult(task.result)" :key="item.label" class="analysis-item">
+                    <span :class="item.status === 'invalid' ? 'icon-cross' : 'icon-check'"></span>
+                    <span :class="{ 'text-red': item.status === 'invalid', 'text-green': item.status === 'valid' }">
+                      {{ item.label }}
+                    </span>
+                  </li>
+                </ul>
+              </details>
+            </div>
           </template>
 
+
           <template v-else-if="task.status === 'failed'">
-            {{ task.url }} <span class="failed">✖</span>
+            {{ task.url }} <span class="failed">✖ Ошибка парсинга URL</span>
           </template>
         </li>
       </ul>
@@ -171,6 +207,7 @@ async function checkKS() {
 }
 
 h2 {
+    font-family: Arial, sans-serif;
   color: #333;
   font-size: 1.5em;
   margin-bottom: 20px;
@@ -182,6 +219,7 @@ label {
   font-size: 1em;
   color: #555;
   margin-bottom: 5px;
+  font-family: Arial, sans-serif;
 }
 
 textarea {
@@ -282,5 +320,106 @@ details summary {
 details summary a {
   text-decoration: none;
   color: inherit;
+}
+
+.result-details {
+  margin-top: 10px;
+}
+
+.analysis-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+.analysis-item {
+  display: flex;
+  align-items: center;
+  padding: 5px 0;
+  font-size: 0.95em;
+}
+
+.icon-check::before,
+.icon-cross::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+}
+
+.icon-check::before {
+  content: '✔';
+  color: #28a745; /* Зеленый для успешных */
+  font-weight: bold;
+}
+
+.icon-cross::before {
+  content: '✖';
+  color: #f44336; /* Красный для неуспешных */
+  font-weight: bold;
+}
+
+.text-red {
+  color: #f44336;
+}
+
+.task-status {
+  margin-bottom: 10px;
+}
+
+.text-green {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.text-red {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.link-green {
+  color: #28a745;
+}
+
+.result-details summary {
+  cursor: pointer;
+  color: #007bff;
+  font-weight: bold;
+}
+
+.analysis-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+}
+
+.analysis-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.icon-check::before {
+  content: '✔️';
+  color: #28a745;
+  margin-right: 8px;
+}
+
+.icon-cross::before {
+  content: '✖️';
+  color: #dc3545;
+  margin-right: 8px;
+}
+
+.result-details a {
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.result-details a:hover {
+  text-decoration: underline;
 }
 </style>
