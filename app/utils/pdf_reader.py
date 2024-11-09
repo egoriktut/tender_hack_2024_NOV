@@ -47,4 +47,4 @@ def parse_pdf_tables(pdf_path):
                     + "\n"
                 )
 
-    return horizontal_tables, vertical_tables
+    return tables

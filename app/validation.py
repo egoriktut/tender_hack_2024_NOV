@@ -13,6 +13,7 @@ import random
 from fuzzywuzzy import fuzz
 from num2words import num2words
 import camelot
+from transformers.utils import download_url
 
 from app.schemas.api import ValidationOption
 from app.schemas.ks import KSAttributes
@@ -55,18 +56,19 @@ class KSValidator:
                 file["downloads_link"], file["name"], page_data.auction_id
             )
             file_path = f'./resources/_{page_data.auction_id}_{file["name"]}'
-            text_pdf, text_pdf_plain = read_file(file_path)
+            text_pdf, text_pdf_plain, pandas_tables = read_file(file_path)
             file["decrypt"] = text_pdf
             file["decrypt_plain"] = text_pdf_plain
+            file["pandas_tables"] = pandas_tables
             print("HERE")
-            try:
-                os.remove(f"{file_path}.decrypt")
-            except FileNotFoundError:
-                pass
+            # try:
+            #     os.remove(f"{file_path}.decrypt")
+            # except FileNotFoundError:
+            #     pass
 
-        output_file_path = f"./resources/{page_data.auction_id}_result.json"
-        with open(output_file_path, "a+", encoding="utf-8") as f:
-            f.write(json.dumps(page_data.json(), ensure_ascii=False, indent=4))
+        # output_file_path = f"./resources/{page_data.auction_id}_result.json"
+        # with open(output_file_path, "a+", encoding="utf-8") as f:
+        #     f.write(json.dumps(page_data.json(), ensure_ascii=False, indent=4))
 
         validation_result = {
             option: validation_checks[option](page_data)
@@ -230,13 +232,6 @@ class KSValidator:
                 "date": ["сроки", "срок", "Дата"],
                 "cost": ["Стоимость", "Цена", "Стоим."],
             }
-            """
-            [{'periodDaysFrom': 1, 'periodDaysTo': 20, 'periodDateFrom': None, 'periodDateTo': None, 
-            'deliveryPlace': 'г г Москва, Город Москва, переулок 5-й Монетчиковский, дом 3, строение 1', 
-            'quantity': 0.0, 'items': [{'sum': 172973.12, 'costPerUnit': 172973.12, 'quantity': 1.0, 'name':
-             'Выполнение работ по текущему ремонту специального объекта', 'buyerId': None, 
-             'isBuyerInvitationSent': False, 'isApprovedByBuyer': None}], 'id': 6236793}]
-            """
             deliveries = api_data.deliveries
             from collections import defaultdict
 
@@ -257,7 +252,7 @@ class KSValidator:
             for item in unique_items:
                 print(item)
 
-            tables = file["decrypt"]
+            tables = file["pandas_tables"]
             validated_items: List = []
 
             for table in tables:
@@ -279,11 +274,14 @@ class KSValidator:
                             print("err")
                             break
             validation_checks.append(len(validated_items) == len(unique_items))
+        print(validation_checks)
+
         return all(validation_checks)
 
 
 
     # map columns name to col id
+    @staticmethod
     def map_pdf_columns(column_name_map, pdf_columns):
         mapped_columns = {}
         for std_name, alternatives in column_name_map.items():
@@ -300,7 +298,8 @@ class KSValidator:
 
 
         return mapped_columns
-    
+
+    @staticmethod
     def check_specification_name_equality(pdf_text: str, api_text: str) -> bool:
         similarity_score = fuzz.partial_ratio(
             pdf_text.lower(), api_text.lower()
