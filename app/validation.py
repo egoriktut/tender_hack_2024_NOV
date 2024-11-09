@@ -342,8 +342,6 @@ class KSValidator:
                     end_index = min(len(text_to_check), index + len(license_text) - 5)
                     substring = normalized_text[start_index:end_index]
                     similarity_score = fuzz.partial_ratio(license_text.lower(), substring.lower())
-                    print(substring)
-                    print(similarity_score)
-                    if similarity_score > 70:
+                    if similarity_score > 80:
                         return True
             return False
