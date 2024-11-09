@@ -118,6 +118,13 @@ function resultLabelFormat(result) {
   return Object.values(result.analysis).every(value => value.status === true);
 }
 
+function toggleSelectAll(event) {
+  if (event.target.checked) {
+    selectedReasons.value = reasons.map(reason => reason.value);
+  } else {
+    selectedReasons.value = [];
+  }
+}
 
 </script>
 
@@ -129,6 +136,15 @@ function resultLabelFormat(result) {
     <textarea id="url" v-model="url" placeholder="Введите URL для проверки, каждый с новой строки..."></textarea>
 
     <div class="checkbox-group">
+      <div class="checkbox-item select-all">
+        <input
+          type="checkbox"
+          :checked="selectedReasons.length === reasons.length"
+          @change="toggleSelectAll"
+          id="select-all"
+        />
+        <label for="select-all">Выбрать все</label>
+      </div>
       <div v-for="reason in reasons" :key="reason.value" class="checkbox-item">
         <input
             type="checkbox"
@@ -183,6 +199,17 @@ function resultLabelFormat(result) {
                     </span>
                   </li>
                 </ul>
+                <textarea
+                  placeholder="Введите отчет по данной КС..."
+                  rows="3"
+                  style="width: 100%; margin-top: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                ></textarea>
+                <button
+                  @click="alert(`Отправка отчета ${task.url}`)"
+                  style="margin-top: 10px; padding: 8px; background-color: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer;"
+                >
+                  Отправить отчет
+                </button>
               </details>
             </div>
           </template>
@@ -423,5 +450,9 @@ details summary a {
 
 .result-details a:hover {
   text-decoration: underline;
+}
+
+.select-all {
+  margin-bottom: 10px;
 }
 </style>
