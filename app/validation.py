@@ -259,6 +259,7 @@ class KSValidator:
 
 
     # map columns name to col id
+    @staticmethod
     def map_pdf_columns(column_name_map, pdf_columns):
         mapped_columns = {}
         for std_name, alternatives in column_name_map.items():
@@ -275,7 +276,8 @@ class KSValidator:
 
 
         return mapped_columns
-    
+
+    @staticmethod
     def check_specification_name_equality(pdf_text: str, api_text: str) -> bool:
         similarity_score = fuzz.partial_ratio(
             pdf_text.lower(), api_text.lower()
