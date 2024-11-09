@@ -58,7 +58,7 @@ class ParserWeb:
         if self.is_real_url(self.url):
             attr = self.get_attributes_ks(self.url)
             if attr:
-                self.attributes = self.get_attributes_ks(self.url)
+                self.attributes = attr
 
 
 def fetch_and_parse(url: str) -> Optional[KSAttributes]:

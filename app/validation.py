@@ -44,9 +44,7 @@ class KSValidator:
                 random.randint(0, 1)
             ),
             ValidationOption.VALIDATE_PRICE: lambda: bool(random.randint(0, 1)),
-            ValidationOption.VALIDATE_SPECIFICATIONS: lambda: bool(
-                random.randint(0, 1)
-            ),
+            ValidationOption.VALIDATE_SPECIFICATIONS: self.validate_specifications,
         }
 
         for file in page_data.files:
@@ -56,6 +54,7 @@ class KSValidator:
             file_path = f'./resources/_{page_data.auction_id}_{file["name"]}'
             text_pdf = read_file(file_path)
             file["decrypt"] = text_pdf
+            file["tables"] = camelot.read_pdf(file_path, pages="all")
             print("HERE")
             print(text_pdf)
             os.remove(file_path)
@@ -92,11 +91,10 @@ class KSValidator:
             for file in page_data.files:
                 if file["decrypt"] is None:
                     continue
-                text_to_check = file["decrypt"]
-                # normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', "", text_to_check)
-                # normalized_text = re.sub(r"\s+", " ", normalized_text)
-                # text_to_check = normalized_text.strip()
-                pattern = r"Размер обеспечения исполнения Контракта составляет\s+\d+(?:\s\d+)*\sрублей\s\d{2}\sкопеек".lower()
+                text_to_check = file["decrypt"].lower().strip()
+                normalized_text = re.sub(r"\s+", " ", text_to_check)
+                text_to_check = normalized_text.strip()
+                pattern = r"размер обеспечения исполнения Контракта составляет\s+\d+(?:\s\d+)*\sрублей\s\d{2}\sкопеек".lower()
                 if re.search(pattern, text_to_check):
                     return False
             return True
@@ -109,10 +107,12 @@ class KSValidator:
                     page_data.isContractGuaranteeRequired
                 )
                 text_to_check = file["decrypt"].lower().strip()
+                normalized_text = re.sub(r"\s+", " ", text_to_check)
+                text_to_check = normalized_text.strip()
                 # print(text_to_check)
                 pattern = (
                     r"размер\s*обеспечения\s*исполнения\s*контракта\s*составляет\s*"
-                    + re.escape(expected_text)
+                    + re.escape(expected_text.lower())
                 )
                 # print(pattern)
                 if re.search(pattern, text_to_check):
@@ -124,6 +124,7 @@ class KSValidator:
             if not file["decrypt"] or not isinstance(file["decrypt"], str):
                 continue
             file_txt = file["decrypt"]
+            print("BEEEFORE", file_txt[:100])
             normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', "", file_txt)
             normalized_text = re.sub(r"\s+", " ", normalized_text)
             normalized_text = normalized_text.strip()
@@ -139,6 +140,7 @@ class KSValidator:
                 )
                 if similarity_score > 70:
                     return True
+            print("CHECE", normalized_text[:100])
             tf_result = self.check_similarity_transformer(page_data.name, normalized_text[:100])
             if tf_result:
                 return True
@@ -165,39 +167,54 @@ class KSValidator:
         else:
             return False
 
-    def validate_specifications(self, pdfname: str, api_data: KSAttributes):
+    def validate_specifications(self, api_data: KSAttributes):
+        validation_checks = []
+        for file in api_data.files:
+            reference_col_name = {
+                "name": ["Наименование", "Название"],
+                "quantity": ["Кол.", "Кол-", "Кол-во", "Количество"],
+                "date": ["сроки", "срок", "Дата"],
+                # "cost": ["Стоимость", "Цена", "Стоим."],
+            }
 
-        reference_col_name = {
-            "name": ["Наименование", "Название"],
-            "quantity": ["Кол.", "Кол-", "Кол-во", "Количество"],
-            "date": ["сроки", "срок", "Дата"],
-            # "cost": ["Стоимость", "Цена", "Стоим."],
-        }
+            items = api_data.deliveries['items']
+            items_map = {}
 
-        items = api_data.deliveries['items']
-        print("ITEMS: ", items)
+            for item_list in items:
+                for item in item_list:
+                    if item['name'] in items_map:
+                        items_map[item['name']]['quantity'] += item['quantity']
+                        items_map[item['name']]['sum'] += item['sum']
+                    else:
+                        items_map[item['name']] = item
+            items = []
+            for key, value in items_map:
+                items.append(value)
+            print("ITEMS: ", items)
 
-        tables = camelot.read_pdf(pdfname, pages="all") 
-        validated_items: List = []
+            tables = file["tables"]
+            validated_items: List = []
 
-        for table in tables:
-            col_name_mapper: dict = self.map_pdf_columns(reference_col_name, table.df.iloc[0])
-    
-            for idx, res_row in enumerate(items):
-                # dont touch header row
-                for index, row in table.df[1:].iterrows():
-                    # try for invalid tables
-                    try:                
-                        name = row[col_name_mapper['name']]
-                        quantity = row[col_name_mapper.get('quantity', None)]
-                        date = row[col_name_mapper.get('date', None)]
-                        if (self.check_specification_name_equality(name, res_row['name']) 
-                            and res_row['periodDaysTo'] in date
-                            and quantity == res_row['quantity']):
-                            validated_items.append(res_row)
-                    except:
-                        print("err")
-        return len(validated_items) == len(items)
+            for table in tables:
+                col_name_mapper: dict = self.map_pdf_columns(reference_col_name, table.df.iloc[0])
+
+                for idx, res_row in enumerate(items):
+                    # dont touch header row
+                    for index, row in table.df[1:].iterrows():
+                        # try for invalid tables
+                        try:
+                            name = row[col_name_mapper['name']]
+                            quantity = row[col_name_mapper.get('quantity', None)]
+                            date = row[col_name_mapper.get('date', None)]
+                            if (self.check_specification_name_equality(name, res_row['name'])
+                                and res_row['periodDaysTo'] in date
+                                and quantity == res_row['quantity']):
+                                validated_items.append(res_row)
+                        except:
+                            print("err")
+                            break
+            validation_checks.append(len(validated_items) == len(items))
+        return all(validation_checks)
 
 
 
