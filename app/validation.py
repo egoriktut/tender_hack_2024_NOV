@@ -155,8 +155,11 @@ class KSValidator:
             if similarity_score > 70:
                 return True
             print("CHECE", normalized_text[:200])
-            tf_result = self.check_similarity3_transformer(page_data.name, normalized_text[start_index:end_index])
-            if tf_result:
+            tf1_result = self.check_similarity_transformer(page_data.name, normalized_text[start_index:end_index])
+            if tf1_result:
+                return True
+            tf2_result = self.check_similarity2_transformer(page_data.name, normalized_text[start_index:end_index])
+            if tf2_result:
                 return True
 
         return False
@@ -192,34 +195,12 @@ class KSValidator:
 
         # Евклидово расстояние между векторами
         euclidean_distance = np.linalg.norm(interface_embedding - td_embedding)
-        print(f"TRANFORMER OPTIMUS {euclidean_distance}, name {name}, text {text}")
+        print(f"TRANFORMER BUMBELBIE {euclidean_distance}, name {name}, text {text}")
 
         # Установим порог для сравнения
         threshold = 5
         # Вывод результата
         if euclidean_distance < threshold:
-            return True
-        else:
-            return False
-
-    def check_similarity3_transformer(self, name: str, text: str) -> bool:
-        texts = [
-            name,
-            text
-        ]
-
-        # Векторизация TF-IDF
-        vectorizer = TfidfVectorizer()
-        tfidf_matrix = vectorizer.fit_transform(texts)
-
-        # Вычисление косинусного сходства
-        similarity_score = cosine_similarity(tfidf_matrix[0], tfidf_matrix[1])[0][0]
-        print(f"TRANFORMER OPTIMUS {similarity_score}, name {name}, text {text}")
-
-        # Установим порог для сравнения
-        threshold = 0.7
-
-        if similarity_score >= threshold:
             return True
         else:
             return False
