@@ -66,15 +66,10 @@ class KSValidator:
             if not file["decrypt"] or not isinstance(file["decrypt"], str):
                 continue
             file_txt = file["decrypt"]
-            # print(file_txt)
+
             normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', '', file_txt)
             normalized_text = re.sub(r'\s+', ' ', normalized_text)
-            normalized_text = normalized_text.strip()
-
-            # Output the normalized text
-            print(normalized_text)
-            with open("check.txt", "w", encoding="utf-8") as f:
-                f.write(normalized_text)
+            normalized_text = normalized_text.strip()[:300]
 
             if page_data.name in normalized_text:
                 return True
