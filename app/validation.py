@@ -68,17 +68,14 @@ class KSValidator:
             if not file["decrypt"] or not isinstance(file["decrypt"], str):
                 continue
             file_txt = file["decrypt"]
-
             normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', '', file_txt)
             normalized_text = re.sub(r'\s+', ' ', normalized_text)
-            normalized_text = normalized_text.strip()[:300]
+            normalized_text = normalized_text.strip()
 
-            # if page_data.name in normalized_text:
-            #     return True
-
-            similarity_score = fuzz.partial_ratio(page_data.name.lower(), normalized_text.lower())
-            print(f"LOLOLOL OMAGAD EEGORIK {similarity_score}")
-            if similarity_score > 90:
-                return True
+            for cut in range(15, 200, 10):
+                similarity_score = fuzz.partial_ratio(page_data.name.lower(), normalized_text[:cut].lower())
+                print(f"LOLOLOL OMAGAD EEGORIK {similarity_score}")
+                if similarity_score > 90:
+                    return True
 
         return False
