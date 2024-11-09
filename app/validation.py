@@ -176,7 +176,7 @@ class KSValidator:
                 "name": ["Наименование", "Название"],
                 "quantity": ["Кол.", "Кол-", "Кол-во", "Количество"],
                 "date": ["сроки", "срок", "Дата"],
-                # "cost": ["Стоимость", "Цена", "Стоим."],
+                "cost": ["Стоимость", "Цена", "Стоим."],
             }
             """
             [{'periodDaysFrom': 1, 'periodDaysTo': 20, 'periodDateFrom': None, 'periodDateTo': None, 
@@ -206,23 +206,23 @@ class KSValidator:
                 print(item)
 
     # print(items)
-    #         items_map = {}
-    #         new_items = []
-    #         for item_list in items:
-    #             new_items.extend(item_list)
-    #
-    #         print(new_items)
-    #         for item in new_items:
-    #
-    #             if item['name'] in items_map:
-    #                 items_map[item['name']]['quantity'] += item['quantity']
-    #                 items_map[item['name']]['sum'] += item['sum']
-    #             else:
-    #                 items_map[item['name']] = item
-    #         items = []
-    #         for key, value in items_map:
-    #             items.append(value)
-    #         print("ITEMS: ", items)
+            items_map = {}
+            new_items = []
+            for item_list in unique_items:
+                new_items.extend(item_list)
+
+            print(new_items)
+            for item in new_items:
+
+                if item['name'] in items_map:
+                    items_map[item['name']]['quantity'] += item['quantity']
+                    items_map[item['name']]['sum'] += item['sum']
+                else:
+                    items_map[item['name']] = item
+            items = []
+            for key, value in items_map:
+                items.append(value)
+            print("ITEMS: ", items)
     #
     #         tables = file["decrypt"]
     #         validated_items: List = []
