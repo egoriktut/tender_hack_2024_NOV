@@ -56,6 +56,8 @@ class KSValidator:
             file_path = f'./resources/_{page_data.auction_id}_{file["name"]}'
             text_pdf = read_file(file_path)
             file["decrypt"] = text_pdf
+            print("HERE")
+            print(text_pdf)
             os.remove(file_path)
             try:
                 os.remove(f"{file_path}.decrypt")
@@ -104,12 +106,10 @@ class KSValidator:
                     page_data.isContractGuaranteeRequired
                 )
                 text_to_check = file["decrypt"].lower().strip()
-                print(text_to_check)
                 pattern = (
                     r"размер\s*обеспечения\s*исполнения\s*контракта\s*составляет\s*"
                     r"30\s*000\s*\(тридцать\s*тысяч\)\s*рублей\s*00\s*\(ноль\)\s*копеек"
                 )
-                print(pattern)
                 if re.search(pattern, text_to_check):
                     return True
             return False
@@ -119,7 +119,6 @@ class KSValidator:
             if not file["decrypt"] or not isinstance(file["decrypt"], str):
                 continue
             file_txt = file["decrypt"]
-            print("BEEEFORE", file_txt[:100])
             normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', "", file_txt)
             normalized_text = re.sub(r"\s+", " ", normalized_text)
             normalized_text = normalized_text.strip()
@@ -135,7 +134,6 @@ class KSValidator:
                 )
                 if similarity_score > 70:
                     return True
-            print("CHECE", normalized_text[:100])
             tf_result = self.check_similarity_transformer(page_data.name, normalized_text[:100])
             if tf_result:
                 return True
