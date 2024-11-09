@@ -3,6 +3,7 @@ import subprocess
 from app.utils.pdf_reader import parse_pdf_tables
 import os
 
+
 def doc_to_pdf(docpath) -> str:
     arr = docpath.split("/")
     dirname = "/".join(arr[:-1])

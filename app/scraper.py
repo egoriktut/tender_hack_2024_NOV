@@ -36,8 +36,16 @@ class ParserWeb:
                     for file in result["files"]
                 ],
                 name=result["name"],
-                isContractGuaranteeRequired=result["contractGuaranteeAmount"] if result["isContractGuaranteeRequired"] else False,
-                isLicenseProduction=result["uploadLicenseDocumentsComment"] if result["isLicenseProduction"] else False,
+                isContractGuaranteeRequired=(
+                    result["contractGuaranteeAmount"]
+                    if result["isContractGuaranteeRequired"]
+                    else False
+                ),
+                isLicenseProduction=(
+                    result["uploadLicenseDocumentsComment"]
+                    if result["isLicenseProduction"]
+                    else False
+                ),
                 deliveries=result["deliveries"],
                 startCost=result["startCost"],
                 contractCost=result["contractCost"],

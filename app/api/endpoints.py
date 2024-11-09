@@ -3,8 +3,11 @@ from typing import Dict
 from celery.result import AsyncResult
 from fastapi import APIRouter
 
-from app.schemas.api import (AnalysisResultResponse, AnalyzeUrlRequest,
-                             AnalyzeUrlResponse)
+from app.schemas.api import (
+    AnalysisResultResponse,
+    AnalyzeUrlRequest,
+    AnalyzeUrlResponse,
+)
 from app.tasks import start_analysis_task
 
 router = APIRouter()
