@@ -72,10 +72,12 @@ class KSValidator:
             normalized_text = re.sub(r'\s+', ' ', normalized_text)
             normalized_text = normalized_text.strip()
 
-            for cut in range(15, 200, 10):
-                similarity_score = fuzz.partial_ratio(page_data.name.lower(), normalized_text[:cut].lower())
-                print(f"LOLOLOL OMAGAD EEGORIK {similarity_score}")
-                if similarity_score > 90:
+            window = len(page_data.name) + 40
+            for start in range(min(200, len(normalized_text)), 10):
+                end = min(start + window, len(normalized_text) - 1)
+                similarity_score = fuzz.partial_ratio(page_data.name.lower(), normalized_text[start:end].lower())
+                print(f"LOLOLOL OMAGAD EEGORIK {similarity_score}, start {start} end {end}, name {page_data.name}")
+                if similarity_score > 70:
                     return True
 
         return False
