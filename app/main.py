@@ -1,3 +1,5 @@
+import multiprocessing
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -11,5 +13,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+multiprocessing.set_start_method('spawn')
 
 app.include_router(endpoints.router)
