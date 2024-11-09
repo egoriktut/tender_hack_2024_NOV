@@ -192,9 +192,9 @@ class KSValidator:
         print(f"TRANFORMER OPTIMUS {euclidean_distance}, name {name}, text {text}")
 
         # Установим порог для сравнения
-        threshold = 75
+        threshold = 5
         # Вывод результата
-        if euclidean_distance >= threshold:
+        if euclidean_distance < threshold:
             return True
         else:
             return False
