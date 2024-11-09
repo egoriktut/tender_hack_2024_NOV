@@ -82,6 +82,8 @@ class KSValidator:
 
     def validate_delivery(self, page_data: KSAttributes) -> ValidationOptionResult:
         print(page_data.deliveries)
+        print(page_data.startCost)
+        print(page_data.contractCost)
         return ValidationOptionResult(status=False, description="")
 
     @staticmethod
