@@ -201,9 +201,11 @@ class KSValidator:
     def validate_specifications(self, api_data: KSAttributes) -> ValidationOptionResult:
         validation_checks = []
         for file in api_data.files:
+            print(file["name"].lower())
             if not (
                 "тз" in file["name"].lower()
-                or "техническое" in file["name"].lower() and "задание" in file["name"].lower()
+                or "т3" in file["name"].lower()
+                or ("техническое" in file["name"].lower() and "задание" in file["name"].lower())
             ):
                 return ValidationOptionResult(status=False, description="нет ТЗ")
             reference_col_name = {
