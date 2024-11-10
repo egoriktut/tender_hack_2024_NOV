@@ -1,6 +1,7 @@
 import json
 import re
 import os
+from datetime import datetime
 from typing import Dict, List, Optional
 
 import numpy as np
@@ -37,7 +38,7 @@ class KSValidator:
                     file.write(chunk)
 
     def validate_content(
-        self, page_data: KSAttributes, validate_params: List[ValidationOption]
+            self, page_data: KSAttributes, validate_params: List[ValidationOption]
     ) -> Dict[ValidationOption, ValidationOptionResult]:
         validation_checks = {
             ValidationOption.VALIDATE_NAMING: self.validate_naming,
@@ -89,21 +90,23 @@ class KSValidator:
                 end = min(len(file_text) - 1, position + len(match) + 50)
                 context_text = file_text[start:end]
                 prompt = f"""
-                    Analyze the following text snippet to determine if it mentions one of the following price terms:
-                    - 'Максимальное значение цены контракта'
-                    - 'Начальная цена'
-                    - 'Цена Контракта'
-
-                    Keep in mind, the text may phrase similar ideas with different wording.
-
-                    Начальная цена: "{page_data.startCost}"
-                    Цена Контракта: "{page_data.startCost}"
-                    Максимальное значение цены контракта: "{page_data.contractCost}"
-
-                    Text snippet:
-                    "{context_text}"
-
-                    Does this text mention the starting price or maximum contract price? Respond only with "yes" or "no"
+                    Analyze the provided text and check if the contract prices mentioned align with the specified values below:
+                    
+                        Initial Contract Price: {page_data.startCost}
+                        Maximum Contract Price: {page_data.contractCost}
+                    
+                    Instructions:
+                    
+                        Find any references to contract prices in the text.
+                        Compare these references to the specified initial and maximum prices.
+                        Only consider whether the numerical values in the text match the provided values.
+                    
+                    Respond in a single word:
+                    
+                        If all references are accurate, respond with "yes".
+                        If any reference is inaccurate, respond with "no".
+                    
+                    Output must be either "yes" or "no" with no explanation or additional words.
                 """
                 prompts.append(prompt)
             for prompt in prompts:
@@ -118,21 +121,30 @@ class KSValidator:
 
     def validate_delivery_graphic(self, page_data: KSAttributes) -> ValidationOptionResult:
         print(page_data.deliveries)
+        contexts = []
+        for file in page_data.files:
+            pattern = r'\b(\d{1,2}[-.]\d{1,2}[-.]\d{2,4})\b|' \
+                      r'\b(дн[яеию]|месяц(?:[яеиу]|ев)?)\b'
+            file_text = file["decrypt_plain"]
+            matches = [(match.start(), match.group()) for match in re.finditer(pattern, file_text, flags=re.IGNORECASE)]
+            for position, match in matches:
+                start = max(0, position - 50)
+                end = min(len(file_text) - 1, position + len(match) + 50)
+                context_text = file_text[start:end]
+                contexts.append(context_text)
+        print(contexts)
+        prompts = []
         for delivery in page_data.deliveries:
-            for item in delivery.get("items", []):
-                pass
-
+            pass
+            # date_start = delivery["periodDaysFrom"]
+            # date_end = delivery["periodDaysTo"]
+            # date_a = datetime.strptime(a, "%d.%m.%Y")
+            # date_b = datetime.strptime(b, "%d.%m.%Y")
+            #
+            # Calculate the difference in days
+            # days_diff = (date_b - date_a).days
             # prompt = f"""
-            #     Проанализируй текст, есть ли упоминания Максимальное значение цены контракта или Начальная цена или Цена Контракта.
-            #     Учти, что тексты могут формулировать одно и то же разными словами.
             #
-            #     Ответь да или нет, если 'Максимальное значение цены контракта' - пустая строка, не проверяй ее
-            #
-            #     Начальная цена: "{page_data.startCost}"
-            #
-            #     Максимальное значение цены контракта: "{page_data.contractCost if page_data.contractCost else ''}"
-            #
-            #     Напиши входят ли эти цены в текст
             #     """
             # result = self.llama.make_a_prompt(prompt)
             # print(result)
@@ -174,8 +186,8 @@ class KSValidator:
                 text_to_check = normalized_text.strip()
                 # print(text_to_check)
                 pattern = (
-                    r"размер\s*обеспечения\s*исполнения\s*контракта\s*составляет\s*"
-                    + re.escape(expected_text.lower())
+                        r"размер\s*обеспечения\s*исполнения\s*контракта\s*составляет\s*"
+                        + re.escape(expected_text.lower())
                 )
                 # print(pattern)
                 if re.search(pattern, text_to_check):
@@ -257,9 +269,9 @@ class KSValidator:
         for file in api_data.files:
             print(file["name"].lower())
             if not (
-                "тз" in file["name"].lower()
-                or "т3" in file["name"].lower()
-                or ("техническое" in file["name"].lower() and "задание" in file["name"].lower())
+                    "тз" in file["name"].lower()
+                    or "т3" in file["name"].lower()
+                    or ("техническое" in file["name"].lower() and "задание" in file["name"].lower())
             ):
                 continue
             reference_col_name = {
@@ -285,7 +297,6 @@ class KSValidator:
             print(aggregated_items)
             unique_items = list(aggregated_items.values())
 
-
             for item in unique_items:
                 print(item)
 
@@ -308,10 +319,16 @@ class KSValidator:
                             quantity = row.get(col_name_mapper.get('quantity', None), None)
                             cost = row.get(col_name_mapper.get('cost', None), None)
                             date = row.get(col_name_mapper.get('date', None), None)
-                            print("HUNYA",self.check_similarity_transformer(name, res_row['name']), self.checkSpecDate(date, res_row["periodDaysTo"]), self.checkSpecCost(cost, res_row[cost]), self.checkSpecEquantity(quantity, res_row['quantity']))
-                            if self.check_similarity_transformer(name, res_row['name']) and self.checkSpecDate(date, res_row["periodDaysTo"]) and self.checkSpecCost(cost, res_row[cost]) and self.checkSpecEquantity(quantity, res_row['quantity']):
+                            print("HUNYA", self.check_similarity_transformer(name, res_row['name']),
+                                  self.checkSpecDate(date, res_row["periodDaysTo"]),
+                                  self.checkSpecCost(cost, res_row[cost]),
+                                  self.checkSpecEquantity(quantity, res_row['quantity']))
+                            if self.check_similarity_transformer(name, res_row['name']) and self.checkSpecDate(date,
+                                                                                                               res_row[
+                                                                                                                   "periodDaysTo"]) and self.checkSpecCost(
+                                    cost, res_row[cost]) and self.checkSpecEquantity(quantity, res_row['quantity']):
                                 validated_items.append(res_row)
-                        
+
                         except:
                             print("err")
                             break
@@ -330,7 +347,7 @@ class KSValidator:
         if pdf_cost is None or api_cost is None:
             return False
         return pdf_cost == api_cost
-    
+
     def checkSpecEquantity(self, pdf_eq: str, api_eq: str) -> bool:
         if pdf_eq is None or api_eq is None:
             return False
@@ -351,7 +368,6 @@ class KSValidator:
                         mapped_columns[std_name] = i
                         found_mapping = True
                 i += 1
-
 
         return mapped_columns
 
