@@ -147,18 +147,21 @@ class KSValidator:
                     date_end = datetime.strptime(date_end_raw, date_format)
                     duration = abs((date_start - date_end).days)
             except:
+                print("EXCEPTION")
                 return ValidationOptionResult(status=False, description="упоминание не найдено")
 
             if date_start is None and date_end is None and duration == 0:
+                print("NO DATA")
                 return ValidationOptionResult(status=False, description="упоминание не найдено")
 
             matched_dates = []
             for file in page_data.files:
                 if date_start is not None and date_end is not None:
+                    print("DATE MATCHING")
                     pattern = r'\b(\d{1,2}[-.]\d{1,2}[-.]\d{2,4})\b'
                     file_text = file["decrypt_plain"]
                     matches = re.findall(pattern, file_text)
-
+                    print(matches)
                     for match in matches:
                         day, month, year = match
                         try:
@@ -170,16 +173,18 @@ class KSValidator:
                     for matched_date in matched_dates:
                         if date_start <= matched_date <= date_end:
                             return ValidationOptionResult(status=True, description="упоминание найдено")
-
+                print("DURATION 1")
+                print(duration)
                 duration_pattern = rf'{duration}\s*(дней|дня|день)'
                 duration_matches = re.findall(duration_pattern, file["decrypt_plain"])
-
+                print(duration_matches)
                 if duration_matches:
                     return ValidationOptionResult(status=True, description="упоминание найдено")
-
+                print("DURATION 2")
+                print(duration)
                 duration_pattern = rf'{duration // 28}\s*(месяцев|месяца|месяц)'
                 duration_matches = re.findall(duration_pattern, file["decrypt_plain"])
-
+                print(duration_matches)
                 if duration_matches:
                     return ValidationOptionResult(status=True, description="упоминание найдено")
 
