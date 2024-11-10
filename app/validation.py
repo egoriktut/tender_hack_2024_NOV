@@ -160,10 +160,11 @@ class KSValidator:
             for file in page_data.files:
                 if date_start is not None and date_end is not None:
                     print("DATE MATCHING")
-                    pattern = r'\b(\d{1,2}[-.]\d{1,2}[-.]\d{2,4})\b'
+                    pattern = r'\b(\d{2})[-.](\d{2})[-.](\d{4})\b'
                     file_text = file["decrypt_plain"]
                     matches = re.findall(pattern, file_text)
                     print(matches)
+                    matched_date = []
                     for match in matches:
                         day, month, year = match
                         try:
@@ -171,7 +172,7 @@ class KSValidator:
                             matched_dates.append(matched_date)
                         except ValueError:
                             pass  # Skip if the date is invalid
-
+                    print(matched_date)
                     for matched_date in matched_dates:
                         if date_start <= matched_date <= date_end:
                             return ValidationOptionResult(status=True, description="упоминание найдено")
