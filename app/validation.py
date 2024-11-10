@@ -43,8 +43,8 @@ class KSValidator:
             ValidationOption.VALIDATE_NAMING: self.validate_naming,
             ValidationOption.VALIDATE_PERFORM_CONTRACT_REQUIRED: self.validate_perform_contract_required,
             ValidationOption.VALIDATE_LICENSE: self.validate_license,
-            ValidationOption.VALIDATE_DELIVERY_GRAPHIC: self.validate_delivery,
-            ValidationOption.VALIDATE_PRICE: lambda: bool(random.randint(0, 1)),
+            ValidationOption.VALIDATE_DELIVERY_GRAPHIC: lambda: bool(random.randint(0, 1)) ,
+            ValidationOption.VALIDATE_PRICE: self.validate_price,
             ValidationOption.VALIDATE_SPECIFICATIONS: self.validate_specifications,
         }
 
@@ -75,32 +75,25 @@ class KSValidator:
 
         return validation_result
 
-    def validate_delivery(self, page_data: KSAttributes) -> ValidationOptionResult:
-        print(page_data.deliveries)
+    def validate_price(self, page_data: KSAttributes) -> ValidationOptionResult:
         print(page_data.startCost)
         print(page_data.contractCost)
-        """
-        4.В карточке КС в разделе «График поставки» значение должно соответствовать значению в проекте контракта и/или в техническом задании
-И
-В карточке КС в разделе «Этап поставки» значение должно соответствовать значению в проекте контракта и/или в техническом задании
-        """
-        prompt = f"""Оцени соответствие между двумя наименованиями закупки и укажи процент совпадения по смыслу. 
-             Учти, что тексты могут формулировать одно и то же разными словами. 
-        
-             Примерный процент соответствия:
-        
-            - 100% — тексты идентичны или передают одно и то же полностью по смыслу.
-            - 70-99% — тексты передают схожий смысл с небольшими отличиями.
-            - 50-69% — тексты передают частично схожий смысл, но есть значимые отличия.
-            - Менее 50% — тексты имеют разные значения.
-        
-            Выведи процент соответствия и объясни, насколько они близки по смыслу.
-        
-            Наименование закупки: "{page_data.name}"
-        
-            Наименование в техническом задании: "{page_data.name}
-        
-            Напиши только процент соответствия"""
+        for file in page_data.files:
+            prompt = f"""
+                Проанализируй текст, есть ли упоминания Максимальное значение цены контракта или Начальная цена или Цена Контракта. 
+                Учти, что тексты могут формулировать одно и то же разными словами. 
+                
+                Ответь да или нет, если 'Максимальное значение цены контракта' - пустая строка, не проверяй ее
+                
+                Начальная цена: "{page_data.startCost}"
+            
+                Максимальное значение цены контракта: "{page_data.contractCost if page_data.contractCost else ''}"
+            
+                Напиши входят лиэти цены в текст
+                {file['decrypt_plain']}
+                """
+            result = self.llama.make_a_prompt(prompt)
+            print(result)
         return ValidationOptionResult(status=False, description="")
 
     @staticmethod
