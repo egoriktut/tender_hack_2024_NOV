@@ -89,8 +89,7 @@ class KSValidator:
             
                 Максимальное значение цены контракта: "{page_data.contractCost if page_data.contractCost else ''}"
             
-                Напиши входят лиэти цены в текст
-                {file['decrypt_plain']}
+                Напиши входят ли эти цены в текст
                 """
             result = self.llama.make_a_prompt(prompt)
             print(result)
