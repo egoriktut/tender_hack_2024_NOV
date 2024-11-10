@@ -367,7 +367,7 @@ class KSValidator:
 
             print(unique_items_str)
 
-            similarity_score = fuzz.partial_ratio(
+            similarity_score = self.check_similarity2_transformer(
                 unique_items_str.lower(), full_pdf_spec_str.lower()
             )
             print(f"res sim {similarity_score}")
@@ -375,7 +375,7 @@ class KSValidator:
 
 
             validation_checks.append(len(validated_items) == len(unique_items))
-            return ValidationOptionResult(status=all(validation_checks), description="")
+            return ValidationOptionResult(status=similarity_score <= 5, description="")
         return ValidationOptionResult(status=False, description="нет ТЗ")
 
     def checkSpecDate(self, pdf_date: str, api_date: str) -> bool:
