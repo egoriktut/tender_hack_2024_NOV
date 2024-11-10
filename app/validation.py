@@ -203,7 +203,7 @@ class KSValidator:
             result.append(date_found)
         print(f"RESULSTSTSTS {result}")
         if all(result):
-            ValidationOptionResult(status=True, description="упоминание найдено")
+            return ValidationOptionResult(status=True, description="упоминание найдено")
         return ValidationOptionResult(status=False, description="упоминание не найдено")
 
     @staticmethod
