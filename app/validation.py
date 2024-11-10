@@ -43,7 +43,7 @@ class KSValidator:
             ValidationOption.VALIDATE_NAMING: self.validate_naming,
             ValidationOption.VALIDATE_PERFORM_CONTRACT_REQUIRED: self.validate_perform_contract_required,
             ValidationOption.VALIDATE_LICENSE: self.validate_license,
-            ValidationOption.VALIDATE_DELIVERY_GRAPHIC: self.validate_delivery_graphic,
+            ValidationOption.VALIDATE_DELIVERY_GRAPHIC: None,
             ValidationOption.VALIDATE_PRICE: self.validate_price,
             ValidationOption.VALIDATE_SPECIFICATIONS: self.validate_specifications,
         }
