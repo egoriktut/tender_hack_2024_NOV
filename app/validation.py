@@ -122,34 +122,60 @@ class KSValidator:
 
     def validate_delivery_graphic(self, page_data: KSAttributes) -> ValidationOptionResult:
         print(page_data.deliveries)
-        contexts = []
-        for file in page_data.files:
-            pattern = r'\b(\d{1,2}[-.]\d{1,2}[-.]\d{2,4})\b|' \
-                      r'\b(дн[яеию]|месяц(?:[яеиу]|ев)?)\b'
-            file_text = file["decrypt_plain"]
-            matches = [(match.start(), match.group()) for match in re.finditer(pattern, file_text, flags=re.IGNORECASE)]
-            for position, match in matches:
-                start = max(0, position - 50)
-                end = min(len(file_text) - 1, position + len(match) + 50)
-                context_text = file_text[start:end]
-                contexts.append(context_text)
-        print(contexts)
-        prompts = []
         for delivery in page_data.deliveries:
-            pass
-            # date_start = delivery["periodDaysFrom"]
-            # date_end = delivery["periodDaysTo"]
-            # date_a = datetime.strptime(a, "%d.%m.%Y")
-            # date_b = datetime.strptime(b, "%d.%m.%Y")
-            #
-            # Calculate the difference in days
-            # days_diff = (date_b - date_a).days
-            # prompt = f"""
-            #
-            #     """
-            # result = self.llama.make_a_prompt(prompt)
-            # print(result)
-        return ValidationOptionResult(status=False, description="")
+            date_start_raw = delivery["periodDaysFrom"]
+            date_end_raw = delivery["periodDaysTo"]
+            date_format = "%d.%m.%Y"
+            duration = 0
+            date_start, date_end = None, None
+            try:
+                if isinstance(date_start_raw, int) and isinstance(date_end_raw, int):
+                    day_start = int(date_start_raw)
+                    day_end = int(date_end_raw)
+                    duration = abs(day_end - day_start)
+
+                if isinstance(date_start_raw, str) and isinstance(date_end_raw, str):
+                    date_start = datetime.strptime(date_start_raw, date_format)
+                    date_end = datetime.strptime(date_end_raw, date_format)
+                    duration = abs((date_start - date_end).days)
+            except:
+                return ValidationOptionResult(status=False, description="упоминание не найдено")
+
+            if date_start is None and date_end is None and duration == 0:
+                return ValidationOptionResult(status=False, description="упоминание не найдено")
+
+            matched_dates = []
+            for file in page_data.files:
+                if date_start is not None and date_end is not None:
+                    pattern = r'\b(\d{1,2}[-.]\d{1,2}[-.]\d{2,4})\b'
+                    file_text = file["decrypt_plain"]
+                    matches = re.findall(pattern, file_text)
+
+                    for match in matches:
+                        day, month, year = match
+                        try:
+                            matched_date = datetime.strptime(f"{day}.{month}.{year}", date_format)
+                            matched_dates.append(matched_date)
+                        except ValueError:
+                            pass  # Skip if the date is invalid
+
+                    for matched_date in matched_dates:
+                        if date_start <= matched_date <= date_end:
+                            return ValidationOptionResult(status=True, description="упоминание найдено")
+
+                duration_pattern = rf'{duration}\s*(дней|дня|день)'
+                duration_matches = re.findall(duration_pattern, file["decrypt_plain"])
+
+                if duration_matches:
+                    return ValidationOptionResult(status=True, description="упоминание найдено")
+
+                duration_pattern = rf'{duration // 28}\s*(месяцев|месяца|месяц)'
+                duration_matches = re.findall(duration_pattern, file["decrypt_plain"])
+
+                if duration_matches:
+                    return ValidationOptionResult(status=True, description="упоминание найдено")
+
+        return ValidationOptionResult(status=False, description="упоминание не найдено")
 
     @staticmethod
     def number_to_words(number: float) -> str:
@@ -327,7 +353,7 @@ class KSValidator:
                             if self.check_similarity_transformer(name, res_row['name']) and self.checkSpecDate(date,
                                                                                                                res_row[
                                                                                                                    "periodDaysTo"]) and self.checkSpecCost(
-                                    cost, res_row[cost]) and self.checkSpecEquantity(quantity, res_row['quantity']):
+                                cost, res_row[cost]) and self.checkSpecEquantity(quantity, res_row['quantity']):
                                 validated_items.append(res_row)
 
                         except:
