@@ -30,6 +30,7 @@ if tables is None:
 
 all_doc_specs = []
 start_id = None
+prev_item_id = None
 table_wid = 0
 
 for table in tables:
@@ -40,21 +41,27 @@ for table in tables:
         print('READING TABLE')
         for i in range(df.shape[0]):
             print(list(df.iloc[i]))
-            if start_id == None:
+            if prev_item_id == None:
                 sid = validator.find_start_id(df)
                 if sid > -1:
-                    start_id = sid
+                    prev_item_id = 1
                     specs = list(df.iloc[start_id])
                     table_wid = len(specs)                    
                     print("POBEDA READ ALL FILE TO END", specs, table_wid, start_id)
 
             else:
                 # ширина равна шир табл
-                print(len(specs), table_wid, len(list(df.iloc[i])), table_wid == len(list(df.iloc[i])))
+                # print(len(specs), table_wid, len(list(df.iloc[i])), table_wid == len(list(df.iloc[i])))
                 if table_wid == len(list(df.iloc[i])):
+                    if list(df.iloc[i])[0] != "":
+                        try:
+                            prev_item_id = int(list(df.iloc(i))[0])
+                        except:
+                            print("error parsing table col 0 for item id")
                     for col_id in range (table_wid):
-                        specs[col_id] += list(df.iloc[i])[col_id]
-    all_doc_specs.append(specs)
+                        specs[prev_item_id] += list(df.iloc[i])[col_id]
+    if len(specs) == table_wid and specs != ["" for i in range(table_wid)]:
+        all_doc_specs.append(specs)
 
 print(all_doc_specs)
             #col_name_mapper: dict = validator.map_pdf_columns(reference_col_name, table.df.iloc[0])
