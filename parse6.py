@@ -45,6 +45,8 @@ for table in tables:
                 sid = validator.find_start_id(df)
                 if sid > -1:
                     prev_item_id = 0
+                    all_doc_specs.append(["" for i in range(table_wid)])
+
                     specs = list(df.iloc[prev_item_id])
                     table_wid = len(specs)                    
                     print("POBEDA READ ALL FILE TO END", specs, table_wid, prev_item_id)
