@@ -342,13 +342,13 @@ class KSValidator:
             validated_items: List = []
             
             pdf_spec_items = self.get_pdf_spec_items(tables)
-            full_pdf_spec_str = " ".join(" ".join(pdf_spec_items))
+            full_pdf_spec_str = ' '.join(item for sublist in pdf_spec_items for item in sublist)
             normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', "", full_pdf_spec_str)
             normalized_text = re.sub(r"\s+", " ", normalized_text)
             full_pdf_spec_str = normalized_text.strip()
             print(full_pdf_spec_str)
             
-            unique_items_str = " ".join(" ".join(unique_items))
+            unique_items_str = ' '.join(item for sublist in unique_items for item in sublist)
             normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', "", unique_items_str)
             normalized_text = re.sub(r"\s+", " ", normalized_text)
             unique_items_str = normalized_text.strip()
