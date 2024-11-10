@@ -54,14 +54,10 @@ for table in tables:
 
             else:
                 # ширина равна шир табл
-                # print(len(specs), table_wid, len(list(df.iloc[i])), table_wid == len(list(df.iloc[i])))
                 if table_wid == len(list(df.iloc[i])):
                     if list(df.iloc[i])[0] != '' and list(df.iloc[i])[0].isdigit():
-                        # print("wanna new prev id [", list(df.iloc[i])[0], "]")
-                        # print(df.iloc[i])
                         try:
                             print("wanna new prev id [", list(df.iloc[i])[0], "]")
-                            # print(df.iloc(i))
                             prev_item_id = int(list(df.iloc[i])[0]) - 1
                             for i in range(len(all_doc_specs), prev_item_id + 1):
                                 all_doc_specs.append(["" for i in range(table_wid)])
