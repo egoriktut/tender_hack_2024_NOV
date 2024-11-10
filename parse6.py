@@ -45,7 +45,7 @@ for table in tables:
                 sid = validator.find_start_id(df)
                 if sid > -1:
                     prev_item_id = 1
-                    specs = list(df.iloc[start_id])
+                    specs = list(df.iloc[prev_item_id])
                     table_wid = len(specs)                    
                     print("POBEDA READ ALL FILE TO END", specs, table_wid, start_id)
 
@@ -53,7 +53,7 @@ for table in tables:
                 # ширина равна шир табл
                 # print(len(specs), table_wid, len(list(df.iloc[i])), table_wid == len(list(df.iloc[i])))
                 if table_wid == len(list(df.iloc[i])):
-                    if list(df.iloc[i])[0] != "":
+                    if list(df.iloc[i])[0] != '':
                         try:
                             prev_item_id = int(list(df.iloc(i))[0])
                         except:
