@@ -36,7 +36,7 @@ for table in tables:
     df = table.df
     specs = []
 
-    if df.shape[1] > 4 and not df.isnull().any().any():
+    if (start_id is None and df.shape[1] > 4 or start_id is not None and df.shape[1] >= table_wid) and not df.isnull().any().any():
         print('READING TABLE')
         for i in range(df.shape[0]):
             print(list(df.iloc[i]))
