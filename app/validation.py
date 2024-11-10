@@ -358,7 +358,7 @@ class KSValidator:
 
             print(unique_items_str)
 
-            similarity_score = fuzz.partial_ratio(
+            similarity_score = self.check_similarity2_transformer(
                 unique_items_str.lower(), full_pdf_spec_str.lower()
             )
             print(f"res sim {similarity_score}")
