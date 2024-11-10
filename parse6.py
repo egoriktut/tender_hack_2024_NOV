@@ -50,6 +50,7 @@ for table in tables:
 
             else:
                 # ширина равна шир табл
+                print(table_wid, len(list(df.iloc[i])), table_wid == len(list(df.iloc[i])))
                 if table_wid == len(list(df.iloc[i])):
                     for col_id in range (table_wid):
                         specs[col_id] += list(df.iloc[i])[col_id]
