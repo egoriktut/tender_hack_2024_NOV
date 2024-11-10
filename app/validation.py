@@ -184,7 +184,7 @@ class KSValidator:
                             date_found = True
                             break
                 print("DURATION 1")
-                for dur in range(min(1, duration - 1), duration + 1):
+                for dur in range(max(1, duration - 1), duration + 1):
                     print(dur)
                     duration_pattern = rf'{dur}\s*(дней|дня|день)'
                     duration_matches = re.findall(duration_pattern, file["decrypt_plain"])
