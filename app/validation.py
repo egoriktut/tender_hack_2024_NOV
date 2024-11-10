@@ -181,6 +181,7 @@ class KSValidator:
                     print(matched_date)
                     for matched_date in matched_dates:
                         if date_start <= matched_date <= date_end:
+                            print("FOUND")
                             date_found = True
                             break
                 print("DURATION 1")
