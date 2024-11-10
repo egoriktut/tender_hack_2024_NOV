@@ -70,6 +70,8 @@ for table in tables:
     if len(specs) == table_wid and specs != ["" for i in range(table_wid)]:
         all_doc_specs.append(specs)
 
-print(all_doc_specs)
+for item in all_doc_specs:
+    print(item)
+# print(all_doc_specs)
             #col_name_mapper: dict = validator.map_pdf_columns(reference_col_name, table.df.iloc[0])
             #print("col mapa", col_name_mapper)
