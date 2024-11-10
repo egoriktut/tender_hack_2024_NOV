@@ -157,7 +157,9 @@ class KSValidator:
                 return ValidationOptionResult(status=False, description="упоминание не найдено")
 
             matched_dates = []
+            result = []
             for file in page_data.files:
+                date_found = False
                 if date_start is not None and date_end is not None:
                     print("DATE MATCHING")
                     pattern = r'\b(\d{2})[-.](\d{2})[-.](\d{4})\b'
@@ -165,6 +167,7 @@ class KSValidator:
                     if file_text is None:
                         continue
                     matches = re.findall(pattern, file_text)
+                    print("PATTTRNS")
                     print(matches)
                     matched_date = []
                     for match in matches:
@@ -174,25 +177,31 @@ class KSValidator:
                             matched_dates.append(matched_date)
                         except ValueError:
                             pass  # Skip if the date is invalid
+                    print("CHECK IN")
                     print(matched_date)
                     for matched_date in matched_dates:
                         if date_start <= matched_date <= date_end:
-                            return ValidationOptionResult(status=True, description="упоминание найдено")
+                            date_found = True
+                            break
                 print("DURATION 1")
-                print(duration)
-                duration_pattern = rf'{duration}\s*(дней|дня|день)'
-                duration_matches = re.findall(duration_pattern, file["decrypt_plain"])
-                print(duration_matches)
-                if duration_matches:
-                    return ValidationOptionResult(status=True, description="упоминание найдено")
+                for dur in range(min(1, duration - 1), duration + 1):
+                    print(dur)
+                    duration_pattern = rf'{dur}\s*(дней|дня|день)'
+                    duration_matches = re.findall(duration_pattern, file["decrypt_plain"])
+                    print(duration_matches)
+                    if duration_matches:
+                        date_found = True
+                        break
                 print("DURATION 2")
                 print(duration)
                 duration_pattern = rf'{duration // 28}\s*(месяцев|месяца|месяц)'
                 duration_matches = re.findall(duration_pattern, file["decrypt_plain"])
                 print(duration_matches)
                 if duration_matches:
-                    return ValidationOptionResult(status=True, description="упоминание найдено")
-
+                    date_found = True
+                result.append(date_found)
+            if all(result):
+                ValidationOptionResult(status=True, description="упоминание найдено")
         return ValidationOptionResult(status=False, description="упоминание не найдено")
 
     @staticmethod
