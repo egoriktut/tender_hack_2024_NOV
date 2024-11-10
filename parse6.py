@@ -55,6 +55,7 @@ for table in tables:
                 if table_wid == len(list(df.iloc[i])):
                     if list(df.iloc[i])[0] != '':
                         try:
+                            print("wanna new prev id ", list(df.iloc(i))[0])
                             prev_item_id = int(list(df.iloc(i))[0])
                         except:
                             print("error parsing table col 0 for item id")
