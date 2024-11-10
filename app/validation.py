@@ -43,7 +43,7 @@ class KSValidator:
             ValidationOption.VALIDATE_NAMING: self.validate_naming,
             ValidationOption.VALIDATE_PERFORM_CONTRACT_REQUIRED: self.validate_perform_contract_required,
             ValidationOption.VALIDATE_LICENSE: self.validate_license,
-            ValidationOption.VALIDATE_DELIVERY_GRAPHIC: None,
+            ValidationOption.VALIDATE_DELIVERY_GRAPHIC: self.validate_delivery_graphic,
             ValidationOption.VALIDATE_PRICE: self.validate_price,
             ValidationOption.VALIDATE_SPECIFICATIONS: self.validate_specifications,
         }
@@ -116,27 +116,27 @@ class KSValidator:
                     continue
         return ValidationOptionResult(status=False, description="упоминание не найдено")
 
-    # def validate_delivery_graphic(self, page_data: KSAttributes) -> ValidationOptionResult:
-    #     print(page_data.deliveries)
-    #     for delivery in page_data.deliveries:
-    #         for item in delivery.get("items", []):
-    #             name = item["name"]
-    #
-    #         prompt = f"""
-    #             Проанализируй текст, есть ли упоминания Максимальное значение цены контракта или Начальная цена или Цена Контракта.
-    #             Учти, что тексты могут формулировать одно и то же разными словами.
-    #
-    #             Ответь да или нет, если 'Максимальное значение цены контракта' - пустая строка, не проверяй ее
-    #
-    #             Начальная цена: "{page_data.startCost}"
-    #
-    #             Максимальное значение цены контракта: "{page_data.contractCost if page_data.contractCost else ''}"
-    #
-    #             Напиши входят ли эти цены в текст
-    #             """
-    #         result = self.llama.make_a_prompt(prompt)
-    #         print(result)
-    #     return ValidationOptionResult(status=False, description="")
+    def validate_delivery_graphic(self, page_data: KSAttributes) -> ValidationOptionResult:
+        print(page_data.deliveries)
+        for delivery in page_data.deliveries:
+            for item in delivery.get("items", []):
+                pass
+
+            # prompt = f"""
+            #     Проанализируй текст, есть ли упоминания Максимальное значение цены контракта или Начальная цена или Цена Контракта.
+            #     Учти, что тексты могут формулировать одно и то же разными словами.
+            #
+            #     Ответь да или нет, если 'Максимальное значение цены контракта' - пустая строка, не проверяй ее
+            #
+            #     Начальная цена: "{page_data.startCost}"
+            #
+            #     Максимальное значение цены контракта: "{page_data.contractCost if page_data.contractCost else ''}"
+            #
+            #     Напиши входят ли эти цены в текст
+            #     """
+            # result = self.llama.make_a_prompt(prompt)
+            # print(result)
+        return ValidationOptionResult(status=False, description="")
 
     @staticmethod
     def number_to_words(number: float) -> str:
