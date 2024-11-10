@@ -133,9 +133,9 @@ class KSValidator:
         for delivery in page_data.deliveries:
             date_start_raw = delivery["periodDateFrom"]
             date_end_raw = delivery["periodDateTo"]
-            day_start_raw = delivery["periodDateFrom"]
-            day_end_raw = delivery["periodDateTo"]
-            date_format = "%d.%m.%Y"
+            day_start_raw = delivery["periodDaysFrom"]
+            day_end_raw = delivery["periodDaysTo"]
+            date_format = "%d.%m.%Y %H:%M:%S"
             duration = 0
             date_start, date_end = None, None
             print(date_end_raw, date_start_raw)
@@ -167,7 +167,7 @@ class KSValidator:
                     for match in matches:
                         day, month, year = match
                         try:
-                            matched_date = datetime.strptime(f"{day}.{month}.{year}", date_format)
+                            matched_date = datetime.strptime(f"{day}.{month}.{year}", "%d.%m.%Y")
                             matched_dates.append(matched_date)
                         except ValueError:
                             pass  # Skip if the date is invalid
