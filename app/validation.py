@@ -462,7 +462,7 @@ class KSValidator:
                 for i in range(df.shape[0]):
                     print(list(df.iloc[i]))
                     if prev_item_id == None:
-                        sid = validator.find_start_id(df)
+                        sid = self.find_start_id(df)
                         if sid > -1:
                             prev_item_id = 0
 
