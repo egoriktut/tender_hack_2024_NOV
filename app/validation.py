@@ -43,7 +43,7 @@ class KSValidator:
             ValidationOption.VALIDATE_NAMING: self.validate_naming,
             ValidationOption.VALIDATE_PERFORM_CONTRACT_REQUIRED: self.validate_perform_contract_required,
             ValidationOption.VALIDATE_LICENSE: self.validate_license,
-            ValidationOption.VALIDATE_DELIVERY_GRAPHIC: lambda: bool(random.randint(0, 1)) ,
+            ValidationOption.VALIDATE_DELIVERY_GRAPHIC: self.validate_delivery_graphic,
             ValidationOption.VALIDATE_PRICE: self.validate_price,
             ValidationOption.VALIDATE_SPECIFICATIONS: self.validate_specifications,
         }
@@ -78,22 +78,57 @@ class KSValidator:
     def validate_price(self, page_data: KSAttributes) -> ValidationOptionResult:
         print(page_data.startCost)
         print(page_data.contractCost)
+
         for file in page_data.files:
-            prompt = f"""
-                Проанализируй текст, есть ли упоминания Максимальное значение цены контракта или Начальная цена или Цена Контракта. 
-                Учти, что тексты могут формулировать одно и то же разными словами. 
+            pattern = r'\b(цена(?:ми|х|м|ми|у|ы|е|ой|ю)?|стоимость(?:ю|и|ям|ей|ями)?)\b'
+            file_text = file["decrypt_plain"]
+            matches = [(match.start(), match.group()) for match in re.finditer(pattern, file_text, flags=re.IGNORECASE)]
+            prompts = []
+            for position, match in matches:
+                start = max(0, position - 50)
+                end = min(len(file_text) - 1, position + len(match) + 50)
+                context_text = file_text[start:end]
+                prompt = f"""
+                    Проанализируй текст, есть ли упоминания Максимальное значение цены контракта или Начальная цена или Цена Контракта. 
+                    Учти, что тексты могут формулировать одно и то же разными словами. 
+                    
+                    Ответь да или нет, если 'Максимальное значение цены контракта' - пустая строка, не проверяй ее
+                    
+                    Начальная цена: "{page_data.startCost}"
                 
-                Ответь да или нет, если 'Максимальное значение цены контракта' - пустая строка, не проверяй ее
+                    Максимальное значение цены контракта: "{page_data.contractCost if page_data.contractCost else ''}"
                 
-                Начальная цена: "{page_data.startCost}"
-            
-                Максимальное значение цены контракта: "{page_data.contractCost if page_data.contractCost else ''}"
-            
-                Напиши входят ли эти цены в текст
-                """
-            result = self.llama.make_a_prompt(prompt)
-            print(result)
+                    Напиши входят ли эти цены в текст
+                    {context_text}
+                    """
+                prompts.append(prompt)
+            for prompt in prompts:
+                result = self.llama.make_a_prompt(prompt)
+                print(prompt)
+                print(result)
         return ValidationOptionResult(status=False, description="")
+
+    # def validate_delivery_graphic(self, page_data: KSAttributes) -> ValidationOptionResult:
+    #     print(page_data.deliveries)
+    #     for delivery in page_data.deliveries:
+    #         for item in delivery.get("items", []):
+    #             name = item["name"]
+    #
+    #         prompt = f"""
+    #             Проанализируй текст, есть ли упоминания Максимальное значение цены контракта или Начальная цена или Цена Контракта.
+    #             Учти, что тексты могут формулировать одно и то же разными словами.
+    #
+    #             Ответь да или нет, если 'Максимальное значение цены контракта' - пустая строка, не проверяй ее
+    #
+    #             Начальная цена: "{page_data.startCost}"
+    #
+    #             Максимальное значение цены контракта: "{page_data.contractCost if page_data.contractCost else ''}"
+    #
+    #             Напиши входят ли эти цены в текст
+    #             """
+    #         result = self.llama.make_a_prompt(prompt)
+    #         print(result)
+    #     return ValidationOptionResult(status=False, description="")
 
     @staticmethod
     def number_to_words(number: float) -> str:
@@ -143,8 +178,6 @@ class KSValidator:
         for file in page_data.files:
             if not file["decrypt_plain"] or not isinstance(file["decrypt_plain"], str):
                 continue
-            # if not file["name"].endswith(".doc") and not file["name"].endswith(".docx"):
-            #     continue
             file_txt = file["decrypt_plain"]
             normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', "", file_txt)
             normalized_text = re.sub(r"\s+", " ", normalized_text)
@@ -179,7 +212,7 @@ class KSValidator:
 
             tf2_score = self.check_similarity2_transformer(page_data.name, normalized_text[start_index:end_index])
             if tf2_score < 5:
-                return ValidationOptionResult(status=True, description=f"{tf2_score:.1%}")
+                return ValidationOptionResult(status=True, description=f"отклонение {tf2_score}")
 
         return ValidationOptionResult(status=False, description="не найдено")
 
