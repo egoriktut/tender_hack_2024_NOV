@@ -3,9 +3,6 @@ import re
 import os
 from typing import Dict, List, Optional
 
-from celery.bin.control import status
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 from sentence_transformers import SentenceTransformer, util
 
@@ -14,10 +11,7 @@ import random
 
 from fuzzywuzzy import fuzz
 from num2words import num2words
-import camelot
-from transformers.utils import download_url
-from transformers.utils.chat_template_utils import description_re
-from websockets.asyncio.server import serve
+from ai.ai_model import AIModel
 
 from app.schemas.api import ValidationOption, ValidationOptionResult
 from app.schemas.ks import KSAttributes
@@ -27,6 +21,7 @@ from app.utils.file_util import read_file
 class KSValidator:
     def __init__(self, model_path: Optional[str] = None) -> None:
         self.model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+        self.llama = AIModel()
 
     @staticmethod
     def download_file(download_link: str, file_name: str, auction_id: int) -> None:
@@ -84,6 +79,28 @@ class KSValidator:
         print(page_data.deliveries)
         print(page_data.startCost)
         print(page_data.contractCost)
+        """
+        4.В карточке КС в разделе «График поставки» значение должно соответствовать значению в проекте контракта и/или в техническом задании
+И
+В карточке КС в разделе «Этап поставки» значение должно соответствовать значению в проекте контракта и/или в техническом задании
+        """
+        prompt = f"""Оцени соответствие между двумя наименованиями закупки и укажи процент совпадения по смыслу. 
+             Учти, что тексты могут формулировать одно и то же разными словами. 
+        
+             Примерный процент соответствия:
+        
+            - 100% — тексты идентичны или передают одно и то же полностью по смыслу.
+            - 70-99% — тексты передают схожий смысл с небольшими отличиями.
+            - 50-69% — тексты передают частично схожий смысл, но есть значимые отличия.
+            - Менее 50% — тексты имеют разные значения.
+        
+            Выведи процент соответствия и объясни, насколько они близки по смыслу.
+        
+            Наименование закупки: "{}"
+        
+            Наименование в техническом задании: "{}
+        
+            Напиши только процент соответствия"""
         return ValidationOptionResult(status=False, description="")
 
     @staticmethod
