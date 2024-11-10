@@ -162,6 +162,8 @@ class KSValidator:
                     print("DATE MATCHING")
                     pattern = r'\b(\d{2})[-.](\d{2})[-.](\d{4})\b'
                     file_text = file["decrypt_plain"]
+                    if file_text is None:
+                        continue
                     matches = re.findall(pattern, file_text)
                     print(matches)
                     matched_date = []
