@@ -89,24 +89,31 @@ class KSValidator:
                 end = min(len(file_text) - 1, position + len(match) + 50)
                 context_text = file_text[start:end]
                 prompt = f"""
-                    Проанализируй текст, есть ли упоминания Максимальное значение цены контракта или Начальная цена или Цена Контракта. 
-                    Учти, что тексты могут формулировать одно и то же разными словами. 
-                    
-                    Ответь да или нет, если 'Максимальное значение цены контракта' - пустая строка, не проверяй ее
-                    
-                    Начальная цена: "{page_data.startCost}"
-                
-                    Максимальное значение цены контракта: "{page_data.contractCost if page_data.contractCost else ''}"
-                
-                    Напиши входят ли эти цены в текст
-                    {context_text}
-                    """
+                    Analyze the following text snippet to determine if it mentions one of the following price terms:
+                    - 'Максимальное значение цены контракта'
+                    - 'Начальная цена'
+                    - 'Цена Контракта'
+
+                    Keep in mind, the text may phrase similar ideas with different wording.
+
+                    Starting price: "{page_data.startCost}"
+                    Maximum contract price: "{page_data.contractCost if page_data.contractCost else ''}"
+
+                    Text snippet:
+                    "{context_text}"
+
+                    Does this text mention the starting price or maximum contract price? Respond only with "yes" or "no"
+                """
                 prompts.append(prompt)
             for prompt in prompts:
                 result = self.llama.make_a_prompt(prompt)
                 print(prompt)
                 print(result)
-        return ValidationOptionResult(status=False, description="")
+                if "yes" in result.lower():
+                    return ValidationOptionResult(status=True, description="упоминание найдено")
+                elif "no" in result.lower():
+                    continue
+        return ValidationOptionResult(status=False, description="упоминание не найдено")
 
     # def validate_delivery_graphic(self, page_data: KSAttributes) -> ValidationOptionResult:
     #     print(page_data.deliveries)
