@@ -54,13 +54,13 @@ for table in tables:
                 # print(len(specs), table_wid, len(list(df.iloc[i])), table_wid == len(list(df.iloc[i])))
                 if table_wid == len(list(df.iloc[i])):
                     if list(df.iloc[i])[0] != '' and list(df.iloc[i])[0].isdigit():
-                        print("wanna new prev id [", list(df.iloc(i))[0], "]")
-                        print(df.iloc(i))
+                        print("wanna new prev id [", list(df.iloc[i])[0], "]")
+                        print(df.iloc[i])
 
                         try:
                             # print("wanna new prev id [", list(df.iloc(i))[0], "]")
                             # print(df.iloc(i))
-                            prev_item_id = int(list(df.iloc(i))[0])
+                            prev_item_id = int(list(df.iloc[i])[0])
                         except:
                             print("error parsing table col 0 for item id")
                             # print("wanna new prev id [", list(df.iloc(i))[0], "]")
