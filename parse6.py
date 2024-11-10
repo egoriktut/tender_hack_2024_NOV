@@ -34,7 +34,7 @@ table_wid = 0
 
 for table in tables:
     df = table.df
-    specs = ["" for i in table_wid]
+    specs = ["" for i in range(table_wid)]
 
     if (start_id is None and df.shape[1] > 4 or start_id is not None and df.shape[1] >= table_wid) and not df.isnull().any().any():
         print('READING TABLE')
