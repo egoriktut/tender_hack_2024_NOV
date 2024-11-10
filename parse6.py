@@ -60,6 +60,7 @@ for table in tables:
                             print("wanna new prev id [", list(df.iloc(i))[0], "]")
                             # print(df.iloc(i))
                             prev_item_id = int(list(df.iloc[i])[0]) - 1
+                            all_doc_specs.append(["" for i in range(table_wid)])
 
                         except:
                             print("error parsing table col 0 for item id")
