@@ -143,8 +143,8 @@ class KSValidator:
         for file in page_data.files:
             if not file["decrypt_plain"] or not isinstance(file["decrypt_plain"], str):
                 continue
-            if not file["name"].endswith(".doc") and not file["name"].endswith(".docx"):
-                continue
+            # if not file["name"].endswith(".doc") and not file["name"].endswith(".docx"):
+            #     continue
             file_txt = file["decrypt_plain"]
             normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', "", file_txt)
             normalized_text = re.sub(r"\s+", " ", normalized_text)
