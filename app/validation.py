@@ -340,37 +340,28 @@ class KSValidator:
             tables = file["pandas_tables"]
             print("tablee", tables)
             validated_items: List = []
-            if tables is None:
-                continue
-            for table in tables:
-                col_name_mapper: dict = self.map_pdf_columns(self.reference_col_name, table.df.iloc[0])
-                print("col mapa", col_name_mapper)
-                for idx, res_row in enumerate(unique_items):
-                    # dont touch header row
-                    print("MEEMEE", idx, res_row)
-                    for index, row in table.df[1:].iterrows():
-                        # try for invalid tables
-                        print("ROW", row)
-                        try:
-                            name = row.get(col_name_mapper['name'], None)
-                            quantity = row.get(col_name_mapper.get('quantity', None), None)
-                            cost = row.get(col_name_mapper.get('cost', None), None)
-                            date = row.get(col_name_mapper.get('date', None), None)
-                            print("HUNYA", self.check_similarity_transformer(name, res_row['name']),
-                                  self.checkSpecDate(date, res_row["periodDaysTo"]),
-                                  self.checkSpecCost(cost, res_row[cost]),
-                                  self.checkSpecEquantity(quantity, res_row['quantity']))
-                            if self.check_similarity_transformer(name, res_row['name']) and self.checkSpecDate(date,
-                                                                                                               res_row[
-                                                                                                                   "periodDaysTo"]) and self.checkSpecCost(
-                                cost, res_row[cost]) and self.checkSpecEquantity(quantity, res_row['quantity']):
-                                validated_items.append(res_row)
+            
+            pdf_spec_items = self.get_pdf_spec_items(tables)
+            full_pdf_spec_str = " ".join(" ".join(pdf_spec_items))
+            normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', "", full_pdf_spec_str)
+            normalized_text = re.sub(r"\s+", " ", normalized_text)
+            full_pdf_spec_str = normalized_text.strip()
+            print(full_pdf_spec_str)
+            
+            unique_items_str = " ".join(" ".join(unique_items))
+            normalized_text = re.sub(r'[^a-zA-Zа-яА-Я0-9.,;:"\'\s-]', "", unique_items_str)
+            normalized_text = re.sub(r"\s+", " ", normalized_text)
+            unique_items_str = normalized_text.strip()
 
-                        except:
-                            print("err")
-                            break
-            print(len(validated_items))
-            print(len(unique_items))
+            print(unique_items_str)
+
+            similarity_score = fuzz.partial_ratio(
+                unique_items_str.lower(), full_pdf_spec_str.lower()
+            )
+            print(f"res sim {similarity_score}")
+            
+
+
             validation_checks.append(len(validated_items) == len(unique_items))
             return ValidationOptionResult(status=all(validation_checks), description="")
         return ValidationOptionResult(status=False, description="нет ТЗ")
@@ -450,6 +441,59 @@ class KSValidator:
             if self.is_start_id(self.reference_col_name, list(df.iloc[i])):
                 return i
         return -1
+    
+    def get_pdf_spec_items(self, tables):
+        if tables is None:
+            print("NULL PAGES")
+            return []
+
+        all_doc_specs = []
+        start_id = None
+        prev_item_id = None
+        table_wid = 0
+        try:
+            for table in tables:
+                df = table.df
+                specs = ["" for i in range(table_wid)]
+
+                if (start_id is None and df.shape[1] > 4 or start_id is not None and df.shape[1] >= table_wid) and not df.isnull().any().any():
+                    print('READING TABLE')
+                    for i in range(df.shape[0]):
+                        print(list(df.iloc[i]))
+                        if prev_item_id == None:
+                            sid = validator.find_start_id(df)
+                            if sid > -1:
+                                prev_item_id = 0
+
+                                specs = list(df.iloc[prev_item_id])
+                                table_wid = len(specs)              
+                                all_doc_specs.append(["" for i in range(table_wid)])
+                
+                                print("POBEDA READ ALL FILE TO END", specs, table_wid, prev_item_id)
+
+                        else:
+                            # ширина равна шир табл
+                            if table_wid == len(list(df.iloc[i])):
+                                if list(df.iloc[i])[0] != '' and list(df.iloc[i])[0].isdigit():
+                                    try:
+                                        print("wanna new prev id [", list(df.iloc[i])[0], "]")
+                                        prev_item_id = int(list(df.iloc[i])[0]) - 1
+                                        for i in range(len(all_doc_specs), prev_item_id + 1):
+                                            all_doc_specs.append(["" for i in range(table_wid)])
+
+
+                                    except:
+                                        print("error parsing table col 0 for item id")
+                                        # print("wanna new prev id [", list(df.iloc(i))[0], "]")
+                                        # print(df.iloc(i))
+                                for col_id in range (table_wid):
+                                    all_doc_specs[prev_item_id][col_id] += " " + list(df.iloc[i])[col_id]
+                if len(specs) == table_wid and specs != ["" for i in range(table_wid)]:
+                    all_doc_specs.append(specs)
+
+            return all_doc_specs
+        except:
+            return []
 
     @staticmethod
     def check_specification_name_equality(pdf_text: str, api_text: str) -> bool:
