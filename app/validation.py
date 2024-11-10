@@ -87,6 +87,8 @@ class KSValidator:
         print(page_data.contractCost)
 
         for file in page_data.files:
+            if not file["name"].endswith(".doc") and not file["name"].endswith(".docx") and not file["name"].endswith(".pdf"):
+                continue
             pattern = r'\b(цена(?:ми|х|м|ми|у|ы|е|ой|ю)?|стоимость(?:ю|и|ям|ей|ями)?)\b'
             file_text = file["decrypt_plain"]
             matches = [(match.start(), match.group()) for match in re.finditer(pattern, file_text, flags=re.IGNORECASE)]
