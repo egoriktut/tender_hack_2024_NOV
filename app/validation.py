@@ -96,8 +96,9 @@ class KSValidator:
 
                     Keep in mind, the text may phrase similar ideas with different wording.
 
-                    Starting price: "{page_data.startCost}"
-                    Maximum contract price: "{page_data.contractCost if page_data.contractCost else ''}"
+                    Начальная цена: "{page_data.startCost}"
+                    Цена Контракта: "{page_data.startCost}"
+                    Максимальное значение цены контракта: "{page_data.contractCost}"
 
                     Text snippet:
                     "{context_text}"
