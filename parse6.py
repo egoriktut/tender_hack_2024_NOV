@@ -60,6 +60,8 @@ for table in tables:
                             prev_item_id = int(list(df.iloc(i))[0])
                         except:
                             print("error parsing table col 0 for item id")
+                            print("wanna new prev id [", list(df.iloc(i))[0], "]")
+                            print(df.iloc(i))
                     for col_id in range (table_wid):
                         specs[prev_item_id] += list(df.iloc[i])[col_id]
     if len(specs) == table_wid and specs != ["" for i in range(table_wid)]:
