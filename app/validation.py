@@ -452,49 +452,49 @@ class KSValidator:
         start_id = None
         prev_item_id = None
         table_wid = 0
-        try:
-            for table in tables:
-                df = table.df
-                specs = ["" for i in range(table_wid)]
+        # try:
+        for table in tables:
+            df = table.df
+            specs = ["" for i in range(table_wid)]
 
-                if (start_id is None and df.shape[1] > 4 or start_id is not None and df.shape[1] >= table_wid) and not df.isnull().any().any():
-                    print('READING TABLE')
-                    for i in range(df.shape[0]):
-                        print(list(df.iloc[i]))
-                        if prev_item_id == None:
-                            sid = validator.find_start_id(df)
-                            if sid > -1:
-                                prev_item_id = 0
+            if (start_id is None and df.shape[1] > 4 or start_id is not None and df.shape[1] >= table_wid) and not df.isnull().any().any():
+                print('READING TABLE')
+                for i in range(df.shape[0]):
+                    print(list(df.iloc[i]))
+                    if prev_item_id == None:
+                        sid = validator.find_start_id(df)
+                        if sid > -1:
+                            prev_item_id = 0
 
-                                specs = list(df.iloc[prev_item_id])
-                                table_wid = len(specs)              
-                                all_doc_specs.append(["" for i in range(table_wid)])
-                
-                                print("POBEDA READ ALL FILE TO END", specs, table_wid, prev_item_id)
+                            specs = list(df.iloc[prev_item_id])
+                            table_wid = len(specs)              
+                            all_doc_specs.append(["" for i in range(table_wid)])
+            
+                            print("POBEDA READ ALL FILE TO END", specs, table_wid, prev_item_id)
 
-                        else:
-                            # ширина равна шир табл
-                            if table_wid == len(list(df.iloc[i])):
-                                if list(df.iloc[i])[0] != '' and list(df.iloc[i])[0].isdigit():
-                                    try:
-                                        print("wanna new prev id [", list(df.iloc[i])[0], "]")
-                                        prev_item_id = int(list(df.iloc[i])[0]) - 1
-                                        for i in range(len(all_doc_specs), prev_item_id + 1):
-                                            all_doc_specs.append(["" for i in range(table_wid)])
+                    else:
+                        # ширина равна шир табл
+                        if table_wid == len(list(df.iloc[i])):
+                            if list(df.iloc[i])[0] != '' and list(df.iloc[i])[0].isdigit():
+                                try:
+                                    print("wanna new prev id [", list(df.iloc[i])[0], "]")
+                                    prev_item_id = int(list(df.iloc[i])[0]) - 1
+                                    for i in range(len(all_doc_specs), prev_item_id + 1):
+                                        all_doc_specs.append(["" for i in range(table_wid)])
 
 
-                                    except:
-                                        print("error parsing table col 0 for item id")
-                                        # print("wanna new prev id [", list(df.iloc(i))[0], "]")
-                                        # print(df.iloc(i))
-                                for col_id in range (table_wid):
-                                    all_doc_specs[prev_item_id][col_id] += " " + list(df.iloc[i])[col_id]
-                if len(specs) == table_wid and specs != ["" for i in range(table_wid)]:
-                    all_doc_specs.append(specs)
+                                except:
+                                    print("error parsing table col 0 for item id")
+                                    # print("wanna new prev id [", list(df.iloc(i))[0], "]")
+                                    # print(df.iloc(i))
+                            for col_id in range (table_wid):
+                                all_doc_specs[prev_item_id][col_id] += " " + list(df.iloc[i])[col_id]
+            if len(specs) == table_wid and specs != ["" for i in range(table_wid)]:
+                all_doc_specs.append(specs)
 
-            return all_doc_specs
-        except:
-            return []
+        return all_doc_specs
+        # except:
+        #     return []
 
     @staticmethod
     def check_specification_name_equality(pdf_text: str, api_text: str) -> bool:
