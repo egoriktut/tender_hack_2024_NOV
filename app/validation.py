@@ -131,16 +131,18 @@ class KSValidator:
     def validate_delivery_graphic(self, page_data: KSAttributes) -> ValidationOptionResult:
         print(page_data.deliveries)
         for delivery in page_data.deliveries:
-            date_start_raw = delivery["periodDaysFrom"]
-            date_end_raw = delivery["periodDaysTo"]
+            date_start_raw = delivery["periodDateFrom"]
+            date_end_raw = delivery["periodDateTo"]
+            day_start_raw = delivery["periodDateFrom"]
+            day_end_raw = delivery["periodDateTo"]
             date_format = "%d.%m.%Y"
             duration = 0
             date_start, date_end = None, None
+            print(date_end_raw, date_start_raw)
+            print(day_start_raw, day_end_raw)
             try:
-                if isinstance(date_start_raw, int) and isinstance(date_end_raw, int):
-                    day_start = int(date_start_raw)
-                    day_end = int(date_end_raw)
-                    duration = abs(day_end - day_start)
+                if isinstance(day_start_raw, int) and isinstance(day_end_raw, int):
+                    duration = abs(day_end_raw - day_start_raw)
 
                 if isinstance(date_start_raw, str) and isinstance(date_end_raw, str):
                     date_start = datetime.strptime(date_start_raw, date_format)
