@@ -62,8 +62,7 @@ for table in tables:
                             print("wanna new prev id [", list(df.iloc(i))[0], "]")
                             # print(df.iloc(i))
                             prev_item_id = int(list(df.iloc[i])[0]) - 1
-                            for i in range(len(all_doc_specs), prev_item_id + 1):
-                                all_doc_specs.append(["" for i in range(table_wid)])
+                            all_doc_specs.append(["" for i in range(table_wid)])
 
 
                         except:
