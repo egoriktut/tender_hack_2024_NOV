@@ -39,7 +39,7 @@ for table in tables:
     if df.shape[1] > 4 and not df.isnull().any().any():
         print('READING TABLE')
         for i in range(df.shape[0]):
-            # print(list(df.iloc[i]))
+            print(list(df.iloc[i]))
             if start_id == None:
                 sid = validator.find_start_id(df)
                 if sid > -1:
@@ -50,7 +50,7 @@ for table in tables:
 
             else:
                 # ширина равна шир табл
-                if table_wid == len(df.iloc[i]):
+                if table_wid == len(list(df.iloc[i])):
                     for col_id in range (table_wid):
                         specs[col_id] += list(df.iloc[i])[col_id]
     all_doc_specs.append(specs)
