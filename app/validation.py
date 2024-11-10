@@ -94,6 +94,7 @@ class KSValidator:
                     
                         Initial Contract Price: {page_data.startCost}
                         Maximum Contract Price: {page_data.contractCost}
+                        Text: {context_text}
                     
                     Instructions:
                     
