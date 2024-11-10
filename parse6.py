@@ -44,7 +44,7 @@ for table in tables:
             if prev_item_id == None:
                 sid = validator.find_start_id(df)
                 if sid > -1:
-                    prev_item_id = 1
+                    prev_item_id = 0
                     specs = list(df.iloc[prev_item_id])
                     table_wid = len(specs)                    
                     print("POBEDA READ ALL FILE TO END", specs, table_wid, prev_item_id)
@@ -60,7 +60,7 @@ for table in tables:
                         try:
                             # print("wanna new prev id [", list(df.iloc(i))[0], "]")
                             # print(df.iloc(i))
-                            prev_item_id = int(list(df.iloc[i])[0])
+                            prev_item_id = int(list(df.iloc[i])[0]) - 1
                         except:
                             print("error parsing table col 0 for item id")
                             # print("wanna new prev id [", list(df.iloc(i))[0], "]")
