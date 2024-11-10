@@ -34,7 +34,7 @@ table_wid = 0
 
 for table in tables:
     df = table.df
-    specs = []
+    specs = ["" for i in table_wid]
 
     if (start_id is None and df.shape[1] > 4 or start_id is not None and df.shape[1] >= table_wid) and not df.isnull().any().any():
         print('READING TABLE')
@@ -50,7 +50,7 @@ for table in tables:
 
             else:
                 # ширина равна шир табл
-                print(len(specs[col_id]), table_wid, len(list(df.iloc[i])), table_wid == len(list(df.iloc[i])))
+                print(len(specs), table_wid, len(list(df.iloc[i])), table_wid == len(list(df.iloc[i])))
                 if table_wid == len(list(df.iloc[i])):
                     for col_id in range (table_wid):
                         specs[col_id] += list(df.iloc[i])[col_id]
