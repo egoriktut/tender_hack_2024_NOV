@@ -366,7 +366,7 @@ class KSValidator:
 
 
             validation_checks.append(len(validated_items) == len(unique_items))
-            return ValidationOptionResult(status=similarity_score >= 5, description="")
+            return ValidationOptionResult(status=similarity_score <= 5, description="")
         return ValidationOptionResult(status=False, description="нет ТЗ")
 
     def checkSpecDate(self, pdf_date: str, api_date: str) -> bool:
