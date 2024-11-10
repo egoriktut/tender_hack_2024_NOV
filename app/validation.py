@@ -412,7 +412,7 @@ class KSValidator:
     
     def find_start_id(self, df):
         for i in range(df.shape[0]):
-            if self.is_start_id(list(df.iloc[i]), self.reference_col_name):
+            if self.is_start_id(self.reference_col_name, list(df.iloc[i])):
                 return i
         return -1
 
