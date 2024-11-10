@@ -130,6 +130,7 @@ class KSValidator:
 
     def validate_delivery_graphic(self, page_data: KSAttributes) -> ValidationOptionResult:
         print(page_data.deliveries)
+        result = []
         for delivery in page_data.deliveries:
             date_start_raw = delivery["periodDateFrom"]
             date_end_raw = delivery["periodDateTo"]
@@ -140,6 +141,7 @@ class KSValidator:
             date_start, date_end = None, None
             print(date_end_raw, date_start_raw)
             print(day_start_raw, day_end_raw)
+            date_found = False
             try:
                 if isinstance(day_start_raw, int) and isinstance(day_end_raw, int):
                     duration = abs(day_end_raw - day_start_raw)
@@ -157,9 +159,7 @@ class KSValidator:
                 return ValidationOptionResult(status=False, description="упоминание не найдено")
 
             matched_dates = []
-            result = []
             for file in page_data.files:
-                date_found = False
                 if date_start is not None and date_end is not None:
                     print("DATE MATCHING")
                     pattern = r'\b(\d{2})[-.](\d{2})[-.](\d{4})\b'
@@ -199,9 +199,9 @@ class KSValidator:
                 print(duration_matches)
                 if duration_matches:
                     date_found = True
-                result.append(date_found)
-            if all(result):
-                ValidationOptionResult(status=True, description="упоминание найдено")
+            result.append(date_found)
+        if all(result):
+            ValidationOptionResult(status=True, description="упоминание найдено")
         return ValidationOptionResult(status=False, description="упоминание не найдено")
 
     @staticmethod
