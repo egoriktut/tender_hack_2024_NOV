@@ -23,6 +23,12 @@ class KSValidator:
     def __init__(self, model_path: Optional[str] = None) -> None:
         self.model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
         self.llama = AIModel()
+        self.reference_col_name = {
+                "name": ["Наименование", "Название"],
+                "quantity": ["Кол.", "Кол-", "Кол-во", "Количество"],
+                "date": ["сроки", "срок", "Дата"],
+                "cost": ["Стоимость", "Цена", "Стоим"],
+            }
 
     @staticmethod
     def download_file(download_link: str, file_name: str, auction_id: int) -> None:
@@ -81,6 +87,8 @@ class KSValidator:
         print(page_data.contractCost)
 
         for file in page_data.files:
+            if not file["name"].endswith(".doc") and not file["name"].endswith(".docx") and not file["name"].endswith(".pdf"):
+                continue
             pattern = r'\b(цена(?:ми|х|м|ми|у|ы|е|ой|ю)?|стоимость(?:ю|и|ям|ей|ями)?)\b'
             file_text = file["decrypt_plain"]
             matches = [(match.start(), match.group()) for match in re.finditer(pattern, file_text, flags=re.IGNORECASE)]
@@ -301,12 +309,7 @@ class KSValidator:
                     or ("техническое" in file["name"].lower() and "задание" in file["name"].lower())
             ):
                 continue
-            reference_col_name = {
-                "name": ["Наименование", "Название"],
-                "quantity": ["Кол.", "Кол-", "Кол-во", "Количество"],
-                "date": ["сроки", "срок", "Дата"],
-                "cost": ["Стоимость", "Цена", "Стоим"],
-            }
+
             deliveries = api_data.deliveries
             from collections import defaultdict
 
@@ -333,7 +336,7 @@ class KSValidator:
             if tables is None:
                 continue
             for table in tables:
-                col_name_mapper: dict = self.map_pdf_columns(reference_col_name, table.df.iloc[0])
+                col_name_mapper: dict = self.map_pdf_columns(self.reference_col_name, table.df.iloc[0])
                 print("col mapa", col_name_mapper)
                 for idx, res_row in enumerate(unique_items):
                     # dont touch header row
@@ -395,8 +398,51 @@ class KSValidator:
                         mapped_columns[std_name] = i
                         found_mapping = True
                 i += 1
-
+        if len(mapped_columns) < 3:
+            return None
         return mapped_columns
+    
+    @staticmethod
+    def is_mappable_pdf_columns(column_name_map, pdf_columns):
+        mapped_columns = {}
+        for std_name, alternatives in column_name_map.items():
+            found_mapping = False
+            i = 0
+            for pdf_col in pdf_columns:
+                if found_mapping:
+                    break
+                for alt in alternatives:
+                    if alt.lower() in pdf_col.lower():
+                        mapped_columns[std_name] = i
+                        found_mapping = True
+                i += 1
+        if len(mapped_columns) < 3:
+            return False
+        return True
+    
+    @staticmethod
+    def is_start_id(column_name_map, pdf_columns):
+        mapped_columns = {}
+        for std_name, alternatives in column_name_map.items():
+            found_mapping = False
+            i = 0
+            for pdf_col in pdf_columns:
+                if found_mapping:
+                    break
+                for alt in alternatives:
+                    if alt.lower() in pdf_col.lower():
+                        mapped_columns[std_name] = i
+                        found_mapping = True
+                i += 1
+        if len(mapped_columns) < 2:
+            return False
+        return True
+    
+    def find_start_id(self, df):
+        for i in range(df.shape[0]):
+            if self.is_start_id(self.reference_col_name, list(df.iloc[i])):
+                return i
+        return -1
 
     @staticmethod
     def check_specification_name_equality(pdf_text: str, api_text: str) -> bool:
