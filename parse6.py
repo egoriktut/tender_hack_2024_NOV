@@ -60,7 +60,7 @@ for table in tables:
                         # print("wanna new prev id [", list(df.iloc[i])[0], "]")
                         # print(df.iloc[i])
                         try:
-                            print("wanna new prev id [", list(df.iloc(i))[0], "]")
+                            print("wanna new prev id [", list(df.iloc[i])[0], "]")
                             # print(df.iloc(i))
                             prev_item_id = int(list(df.iloc[i])[0]) - 1
                             for i in range(len(all_doc_specs), prev_item_id + 1):
@@ -72,7 +72,6 @@ for table in tables:
                             # print("wanna new prev id [", list(df.iloc(i))[0], "]")
                             # print(df.iloc(i))
                     for col_id in range (table_wid):
-                        # print(prev_item_id, all_doc_specs, col_id, list(df.iloc[i]))
                         all_doc_specs[prev_item_id][col_id] += " " + list(df.iloc[i])[col_id]
     if len(specs) == table_wid and specs != ["" for i in range(table_wid)]:
         all_doc_specs.append(specs)
