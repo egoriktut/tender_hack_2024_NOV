@@ -47,19 +47,19 @@ for table in tables:
                     prev_item_id = 1
                     specs = list(df.iloc[prev_item_id])
                     table_wid = len(specs)                    
-                    print("POBEDA READ ALL FILE TO END", specs, table_wid, start_id)
+                    print("POBEDA READ ALL FILE TO END", specs, table_wid, prev_item_id)
 
             else:
                 # ширина равна шир табл
                 # print(len(specs), table_wid, len(list(df.iloc[i])), table_wid == len(list(df.iloc[i])))
                 if table_wid == len(list(df.iloc[i])):
-                    if list(df.iloc[i])[0] != '':
+                    if list(df.iloc[i])[0] != '' and list(df.iloc[i])[0].isDigit():
                         print("wanna new prev id [", list(df.iloc(i))[0], "]")
                         print(df.iloc(i))
 
                         try:
-                            print("wanna new prev id [", list(df.iloc(i))[0], "]")
-                            print(df.iloc(i))
+                            # print("wanna new prev id [", list(df.iloc(i))[0], "]")
+                            # print(df.iloc(i))
                             prev_item_id = int(list(df.iloc(i))[0])
                         except:
                             print("error parsing table col 0 for item id")
